@@ -32,37 +32,44 @@
     "AAPL": {
       "shares": 0.029144,
       "investedUSD": 8.75,
-      "avgCostUSD": 300.23
+      "avgCostUSD": 300.23,
+      "lastPriceUSD": 300.23
     },
     "NVDA": {
       "shares": 0.038834,
       "investedUSD": 8.75,
-      "avgCostUSD": 225.32
+      "avgCostUSD": 225.32,
+      "lastPriceUSD": 225.32
     },
     "MSFT": {
       "shares": 0.020739,
       "investedUSD": 8.75,
-      "avgCostUSD": 421.91
+      "avgCostUSD": 421.91,
+      "lastPriceUSD": 421.92
     },
     "GOOGL": {
       "shares": 0.022053,
       "investedUSD": 8.75,
-      "avgCostUSD": 396.77
+      "avgCostUSD": 396.77,
+      "lastPriceUSD": 396.78
     },
     "AMZN": {
       "shares": 0.033126,
       "investedUSD": 8.75,
-      "avgCostUSD": 264.14
+      "avgCostUSD": 264.14,
+      "lastPriceUSD": 264.14
     },
     "META": {
       "shares": 0.014245,
       "investedUSD": 8.75,
-      "avgCostUSD": 614.25
+      "avgCostUSD": 614.25,
+      "lastPriceUSD": 614.23
     },
     "TSM": {
       "shares": 0.02164,
       "investedUSD": 8.75,
-      "avgCostUSD": 404.34
+      "avgCostUSD": 404.34,
+      "lastPriceUSD": 404.35
     }
   },
   "history": "portfolio/history.json",
