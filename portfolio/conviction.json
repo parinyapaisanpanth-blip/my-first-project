@@ -1,0 +1,5 @@
+{
+  "_note": "Earth conviction /25 ต่อ ticker. ผู้ใช้ regenerate เองด้วย Claude ในเครื่อง (รัน Earth agent หรือ /compare) แล้ว commit. ticker ขาด/ไม่มีในที่นี้ = equal-weight fallback.",
+  "updated": null,
+  "scores": {}
+}

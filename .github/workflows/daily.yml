@@ -3,7 +3,12 @@ name: daily-news
 on:
   schedule:
     - cron: '0 23 * * *'   # 06:00 Asia/Bangkok (UTC+7)
-  workflow_dispatch:         # allow manual trigger from Actions tab
+  workflow_dispatch:
+    inputs:
+      force_buy:
+        description: 'Force DCA buy regardless of day (for testing)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -29,11 +34,17 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Run dca-pilot
+        run: node scripts/dca-pilot.mjs
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          FORCE_BUY: ${{ github.event.inputs.force_buy }}
+
       - name: Commit and push news digest
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add knowledge/news knowledge/INDEX.md
+          git add knowledge/news knowledge/INDEX.md portfolio/state.json portfolio/history.json portfolio/conviction.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

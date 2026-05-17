@@ -23,7 +23,9 @@
 | xAI Grok | ข่าว/sentiment จาก X — **deferred เฟส 3+** | เรียกจาก job | ตาม API |
 | Market data | ราคาหุ้นรายวันสำหรับตีมูลค่าพอร์ต | เรียกจาก job | free tier |
 
-**Market data decision (ตัดสินแล้ว):** Finnhub = primary (free 60 call/นาที), Twelve Data = fallback เมื่อ Finnhub error/rate-limit
+**Market data decision (ตัดสินแล้ว):** Finnhub quote API = ราคาหุ้น (free 60 call/นาที), Twelve Data = fallback เมื่อ Finnhub error/rate-limit
+
+**FX decision (เฟส 3):** USDTHB rate จาก open.er-api.com (free, ไม่ต้องใช้ key) → exchangerate.host fallback; Finnhub forex endpoint = premium tier ไม่ใช้
 
 **Logo:** ใช้ field `logo` จาก Finnhub company-profile2 endpoint (ไม่ต้องเพิ่ม service โลโก้แยก)
 
@@ -72,7 +74,7 @@ showcase/
 | 0 — Prereq | push repo ขึ้น GitHub, สมัคร API key (Anthropic/Gemini/Grok/Finnhub/Twelve Data), ใส่ GitHub Secrets, ลง Claude Agent SDK | — |
 | 1 — ข่าวรายวัน | scout-news + .github/workflows/daily.yml + expiry cleanup + auto-commit — **done** (known issue: TSM 13F-dump noise ยอมรับเป็น v1 แก้เฟส 5) | 0 |
 | 2 — Portfolio model | portfolio/state.json + rules.md + กติกา DCA (ยังไม่ automate) + seed เริ่มต้น — **done** | 0 |
-| 3 — dca-pilot | agent จำลองซื้อ + ดึงราคา Finnhub/Twelve Data + เขียน history.json (NAV รายวัน) เสียบ cron | 1, 2 |
+| 3 — dca-pilot | จำลองซื้อ DCA รายสัปดาห์ + NAV รายวัน (Finnhub quote + open.er-api FX, ไม่มี Claude/LLM ใน CI) — **done (pending verify: Run workflow → force_buy=true)** conviction = `portfolio/conviction.json` ที่ผู้ใช้ refresh เอง | 1, 2 |
 | 4 — เว็บอัปเดตเอง | regenerate index.html จาก state/history + Vercel auto-deploy on push | 3 |
 | 5 — Hardening | idempotent cron, error/retry, cost cap, log, กันรันซ้ำวันเดียวกัน | 1-4 |
 
@@ -93,7 +95,7 @@ showcase/
 - [x] งบ DCA = 10,000 / เดือน
 - [x] การแบ่งน้ำหนัก = ตาม conviction (Earth score) เป็น default, เท่ากันเป็น fallback ถ้ายังไม่มี brief/score — config ใน portfolio/rules.md
 
-- [x] สกุลงบ = **THB** (แปลง USD ด้วย USDTHB rate จาก Finnhub ทุกวันที่รัน)
+- [x] สกุลงบ = **THB** (แปลง USD ด้วย USDTHB rate จาก open.er-api.com ทุกวันที่รัน — free, no key)
 - [x] จังหวะ DCA = **ทุกวันศุกร์** (weekly-friday) งบ = 10,000 ÷ จำนวนศุกร์ในเดือนนั้น
 
 ## H. ค่าใช้จ่าย (คร่าว)
