@@ -43,6 +43,23 @@ function extractJson(text) {
   return JSON.parse(m[0]);
 }
 
+// ── network retry (error or 5xx → backoff 1s,2s; exhaust = throw original) ─────
+
+async function fetchRetry(url, opts = {}, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url, opts);
+      if (res.status >= 500) throw new Error(`HTTP ${res.status}`);
+      return res;
+    } catch (e) {
+      lastErr = e;
+      if (i < tries - 1) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 // ── Finnhub company-news ──────────────────────────────────────────────────────
 
 async function fetchFinnhubNews(ticker, apiKey, aliases = []) {
@@ -53,13 +70,14 @@ async function fetchFinnhubNews(ticker, apiKey, aliases = []) {
     `https://finnhub.io/api/v1/company-news?symbol=${encodeURIComponent(ticker)}` +
     `&from=${fromDate}&to=${toDate}&token=${apiKey}`;
 
-  const res = await fetch(url);
+  const res = await fetchRetry(url);
   if (!res.ok) throw new Error(`Finnhub HTTP ${res.status} for ${ticker}`);
 
   const articles = await res.json();
   if (!Array.isArray(articles)) throw new Error(`Unexpected Finnhub response for ${ticker}`);
 
-  // Relevance: headline or summary must contain ticker symbol (word-boundary) or any alias
+  // Relevance (Phase 5: stricter): ticker/alias must appear in the HEADLINE itself,
+  // no longer summary-only. Cuts 13F-dump articles that name-drop in the body.
   const patterns = [ticker, ...aliases].map(
     t => new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
   );
@@ -69,9 +87,11 @@ async function fetchFinnhubNews(ticker, apiKey, aliases = []) {
   const filtered = [];
   for (const a of articles) {
     if (a.datetime < cutoff48h) continue;
-    const text = `${a.headline ?? ''} ${a.summary ?? ''}`;
-    if (!patterns.some(re => re.test(text))) continue;
-    const key = (a.headline ?? '').toLowerCase().trim().replace(/\s+/g, ' ');
+    const headline = a.headline ?? '';
+    // Drop list/dump articles (13F roundups etc.): many ';' or very long headline
+    if ((headline.match(/;/g) ?? []).length >= 3 || headline.length > 180) continue;
+    if (!patterns.some(re => re.test(headline))) continue;
+    const key = headline.toLowerCase().trim().replace(/\s+/g, ' ');
     if (seen.has(key)) continue;
     seen.add(key);
     filtered.push(a);

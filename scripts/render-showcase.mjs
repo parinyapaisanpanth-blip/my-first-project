@@ -40,6 +40,7 @@ const returnPct   = lastEntry?.returnPct   ?? 0;
 const fxRate      = state.fx?.lastRate     ?? null;
 const lastRun     = state.lastRun          ?? null;
 const startDate   = state.startDate        ?? null;
+const cashTHB     = state.cashTHB          ?? 0;
 
 // ── Stat cards ────────────────────────────────────────────────────────────────
 
@@ -62,6 +63,11 @@ const statsHtml = `<div class="port-stats">
     <div class="port-stat-label">ผลตอบแทน</div>
     <div class="${returnClass}">${investedTHB > 0 ? `${returnSign}${returnPct}%` : '—'}</div>
     <div class="port-stat-sub">${lastRun ? `อัปเดต ${lastRun}` : '&nbsp;'}</div>
+  </div>
+  <div class="port-stat">
+    <div class="port-stat-label">เงินสดเศษ (THB)</div>
+    <div class="port-stat-val num">${cashTHB > 0 ? fmt2(cashTHB) : '0.00'}</div>
+    <div class="port-stat-sub">เศษปัดจาก allocation</div>
   </div>
 </div>`;
 

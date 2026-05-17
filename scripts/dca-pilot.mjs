@@ -33,6 +33,22 @@ function todayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// network retry: error or 5xx → backoff 1s,2s; exhaust tries = throw original
+async function fetchRetry(url, opts = {}, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url, opts);
+      if (res.status >= 500) throw new Error(`HTTP ${res.status}`);
+      return res;
+    } catch (e) {
+      lastErr = e;
+      if (i < tries - 1) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 function readJSON(relPath, fallback) {
   const full = join(ROOT, relPath);
   if (!existsSync(full)) return fallback;
@@ -82,7 +98,7 @@ const prices = {};  // ticker → USD price (current)
 
 for (const ticker of tickers) {
   try {
-    const res = await fetch(
+    const res = await fetchRetry(
       `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`
     );
     if (!res.ok) {
@@ -113,7 +129,7 @@ if (validTickers.length === 0) {
 let fxRate = null;
 
 try {
-  const res = await fetch('https://open.er-api.com/v6/latest/USD');
+  const res = await fetchRetry('https://open.er-api.com/v6/latest/USD');
   if (res.ok) {
     const data = await res.json();
     fxRate = data?.rates?.THB ?? null;
@@ -124,15 +140,18 @@ try {
 }
 
 if (!fxRate) {
+  // exchangerate.host now requires a key — use free no-key currency-api (jsdelivr CDN)
   try {
-    const res = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=THB');
+    const res = await fetchRetry(
+      'https://cdn.jsdelivr.net/npm/@fawaz-ahmed/currency-api@latest/v1/currencies/usd.json'
+    );
     if (res.ok) {
       const data = await res.json();
-      fxRate = data?.rates?.THB ?? null;
-      if (fxRate) console.log(`\nFX USDTHB: ${fxRate} (exchangerate.host fallback)`);
+      fxRate = data?.usd?.thb ?? null;
+      if (fxRate) console.log(`\nFX USDTHB: ${fxRate} (currency-api jsdelivr fallback)`);
     }
   } catch (e) {
-    console.warn(`WARN: exchangerate.host failed: ${e.message}`);
+    console.warn(`WARN: currency-api jsdelivr failed: ${e.message}`);
   }
 }
 
