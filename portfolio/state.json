@@ -8,18 +8,64 @@
   "fx": {
     "pair": "USDTHB",
     "source": "finnhub",
-    "lastRate": null,
-    "lastRateDate": null
+    "lastRate": 32.64,
+    "lastRateDate": "2026-05-17"
   },
   "weighting": {
     "method": "conviction",
     "source": "earth-agent",
     "fallback": "equal"
   },
-  "watchlist": ["AAPL", "NVDA", "MSFT", "GOOGL", "AMZN", "META", "TSM"],
-  "startDate": null,
+  "watchlist": [
+    "AAPL",
+    "NVDA",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "TSM"
+  ],
+  "startDate": "2026-05-17",
   "cashTHB": 0,
-  "holdings": {},
+  "holdings": {
+    "AAPL": {
+      "shares": 0.029144,
+      "investedUSD": 8.75,
+      "avgCostUSD": 300.23
+    },
+    "NVDA": {
+      "shares": 0.038834,
+      "investedUSD": 8.75,
+      "avgCostUSD": 225.32
+    },
+    "MSFT": {
+      "shares": 0.020739,
+      "investedUSD": 8.75,
+      "avgCostUSD": 421.91
+    },
+    "GOOGL": {
+      "shares": 0.022053,
+      "investedUSD": 8.75,
+      "avgCostUSD": 396.77
+    },
+    "AMZN": {
+      "shares": 0.033126,
+      "investedUSD": 8.75,
+      "avgCostUSD": 264.14
+    },
+    "META": {
+      "shares": 0.014245,
+      "investedUSD": 8.75,
+      "avgCostUSD": 614.25
+    },
+    "TSM": {
+      "shares": 0.02164,
+      "investedUSD": 8.75,
+      "avgCostUSD": 404.34
+    }
+  },
   "history": "portfolio/history.json",
-  "lastRun": null
+  "lastRun": "2026-05-17",
+  "totalInvestedTHB": 2000,
+  "lastBuyDate": "2026-05-17"
 }
