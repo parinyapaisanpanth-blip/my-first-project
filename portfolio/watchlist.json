@@ -1,3 +1,12 @@
 {
-  "tickers": ["AAPL", "NVDA", "MSFT", "GOOGL", "AMZN", "META", "TSM"]
+  "tickers": ["AAPL", "NVDA", "MSFT", "GOOGL", "AMZN", "META", "TSM"],
+  "aliases": {
+    "AAPL": ["Apple"],
+    "NVDA": ["Nvidia", "NVIDIA"],
+    "MSFT": ["Microsoft"],
+    "GOOGL": ["Google", "Alphabet"],
+    "AMZN": ["Amazon"],
+    "META": ["Meta", "Facebook", "Instagram"],
+    "TSM": ["Taiwan Semiconductor", "TSMC"]
+  }
 }

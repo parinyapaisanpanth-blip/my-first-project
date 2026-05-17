@@ -9,7 +9,7 @@
  *         GEMINI_API_KEY   (optional — sentiment; falls back to "n/a" on error/missing)
  *         GITHUB_TOKEN     (reserved — GitHub Models stub, TODO)
  *
- * Exit code: 0 if at least one ticker has news, 1 if all tickers return no news.
+ * Exit code: 0 unless Finnhub fails for every ticker (network/key error).
  */
 
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
@@ -45,7 +45,7 @@ function extractJson(text) {
 
 // ── Finnhub company-news ──────────────────────────────────────────────────────
 
-async function fetchFinnhubNews(ticker, apiKey) {
+async function fetchFinnhubNews(ticker, apiKey, aliases = []) {
   const cutoff48h = Math.floor(Date.now() / 1000) - 48 * 3600;
   const fromDate = addDays(todayISO(), -2);
   const toDate = todayISO();
@@ -59,8 +59,25 @@ async function fetchFinnhubNews(ticker, apiKey) {
   const articles = await res.json();
   if (!Array.isArray(articles)) throw new Error(`Unexpected Finnhub response for ${ticker}`);
 
-  return articles
-    .filter(a => a.datetime >= cutoff48h)
+  // Relevance: headline or summary must contain ticker symbol (word-boundary) or any alias
+  const patterns = [ticker, ...aliases].map(
+    t => new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+  );
+
+  // Dedupe by normalized headline, then relevance-filter within 48h window
+  const seen = new Set();
+  const filtered = [];
+  for (const a of articles) {
+    if (a.datetime < cutoff48h) continue;
+    const text = `${a.headline ?? ''} ${a.summary ?? ''}`;
+    if (!patterns.some(re => re.test(text))) continue;
+    const key = (a.headline ?? '').toLowerCase().trim().replace(/\s+/g, ' ');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    filtered.push(a);
+  }
+
+  return filtered
     .sort((a, b) => b.datetime - a.datetime)
     .slice(0, 3)
     .map(a => ({
@@ -123,6 +140,7 @@ async function callGithubModels(_ticker, _token) {
 
 const watchlist = JSON.parse(readFileSync(join(ROOT, 'portfolio/watchlist.json'), 'utf8'));
 const tickers = watchlist.tickers;
+const aliases = watchlist.aliases ?? {};
 const todayStr = todayISO();
 const expiresStr = addDays(todayStr, 14);
 const finnhubKey = process.env.FINNHUB_API_KEY;
@@ -130,7 +148,8 @@ const finnhubKey = process.env.FINNHUB_API_KEY;
 // ── Step 1: fetch news from Finnhub per ticker ─────────────────────────────────
 
 const newsMap = {};
-let tickersWithNews = 0;
+let finnhubOkCount = 0;   // tickers where Finnhub returned a valid array
+let tickersWithNews = 0;  // tickers with at least 1 relevant article after filtering
 
 for (const ticker of tickers) {
   process.stdout.write(`[${ticker}] fetching news... `);
@@ -140,13 +159,14 @@ for (const ticker of tickers) {
     continue;
   }
   try {
-    const news = await fetchFinnhubNews(ticker, finnhubKey);
+    const news = await fetchFinnhubNews(ticker, finnhubKey, aliases[ticker] ?? []);
+    finnhubOkCount++;
     newsMap[ticker] = news;
     if (news.length) {
       tickersWithNews++;
-      console.log(`${news.length} item(s)`);
+      console.log(`${news.length} relevant item(s)`);
     } else {
-      console.log('no news in 48h');
+      console.log('no relevant news in 48h');
     }
   } catch (e) {
     console.error(`error — ${e.message}`);
@@ -154,10 +174,11 @@ for (const ticker of tickers) {
   }
 }
 
-if (tickersWithNews === 0) {
-  console.error('ERROR: no news found for any ticker. Exiting 1.');
+if (finnhubOkCount === 0) {
+  console.error('ERROR: Finnhub returned no valid response for any ticker (network/key). Exiting 1.');
   process.exit(1);
 }
+// tickersWithNews === 0 is valid — Finnhub worked but all articles were noise/filtered out
 
 // ── Step 2: batch sentiment via Gemini (optional, non-blocking) ────────────────
 
@@ -193,8 +214,8 @@ const overallSentiment = scoredSentiments.length
   ? (bullishCount > bearishCount ? 'bullish' : bearishCount > bullishCount ? 'bearish' : 'mixed')
   : null;
 const summaryLine = overallSentiment
-  ? `${overallSentiment} — ${tickersWithNews}/${tickers.length} tickers with news`
-  : `${tickersWithNews}/${tickers.length} tickers with news`;
+  ? `${overallSentiment} — ${tickersWithNews}/${tickers.length} tickers with relevant news`
+  : `${tickersWithNews}/${tickers.length} tickers with relevant news`;
 
 let md = `---
 title: News digest ${todayStr}
