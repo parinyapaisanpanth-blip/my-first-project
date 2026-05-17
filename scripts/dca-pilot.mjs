@@ -25,6 +25,10 @@ function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
+function round6(n) {
+  return Math.round(n * 1e6) / 1e6;
+}
+
 function todayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -176,19 +180,19 @@ if (doBuy) {
     const sharesBought = allocUSD / price;  // fractional shares — simulation
 
     const h = state.holdings[ticker] ?? { shares: 0, investedUSD: 0, avgCostUSD: 0 };
-    h.shares      = round2(h.shares + sharesBought);
+    h.shares      = round6(h.shares + sharesBought);
     h.investedUSD = round2(h.investedUSD + allocUSD);
     h.avgCostUSD  = h.shares > 0 ? round2(h.investedUSD / h.shares) : 0;
     state.holdings[ticker] = h;
 
     buys[ticker] = {
       usd:    allocUSD,
-      shares: round2(sharesBought),
+      shares: round6(sharesBought),
       price:  round2(price),
       weightPct: round2(weight * 100),
     };
 
-    console.log(`  [${ticker}] ${round2(sharesBought)} shares @ $${round2(price)} (${round2(weight * 100)}%)`);
+    console.log(`  [${ticker}] ${round6(sharesBought)} shares @ $${round2(price)} (${round2(weight * 100)}%)`);
   }
 
   state.startDate        = state.startDate ?? today;
