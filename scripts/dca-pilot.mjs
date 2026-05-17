@@ -173,6 +173,8 @@ if (doBuy) {
   }
   const totalScore = Object.values(effectiveScores).reduce((s, v) => s + v, 0);
 
+  let deployedUSD = 0;
+
   for (const ticker of validTickers) {
     const weight      = effectiveScores[ticker] / totalScore;
     const allocUSD    = round2(weeklyUSD * weight);
@@ -192,8 +194,13 @@ if (doBuy) {
       weightPct: round2(weight * 100),
     };
 
+    deployedUSD += allocUSD;
     console.log(`  [${ticker}] ${round6(sharesBought)} shares @ $${round2(price)} (${round2(weight * 100)}%)`);
   }
+
+  // rounding residual: any undeployed fraction stays as cash THB
+  const deployedTHB  = round2(deployedUSD * fxRate);
+  state.cashTHB      = round2((state.cashTHB ?? 0) + (weeklyTHB - deployedTHB));
 
   state.startDate        = state.startDate ?? today;
   state.lastBuyDate      = today;
@@ -207,11 +214,11 @@ for (const [ticker, holding] of Object.entries(state.holdings)) {
   if (prices[ticker]) navUSD += holding.shares * prices[ticker];
 }
 navUSD = round2(navUSD);
-const navTHB      = round2(navUSD * fxRate);
+const navTHB      = round2(navUSD * fxRate + (state.cashTHB ?? 0));
 const investedTHB = round2(state.totalInvestedTHB ?? 0);
 const returnPct   = investedTHB > 0 ? round2((navTHB - investedTHB) / investedTHB * 100) : 0;
 
-console.log(`\nNAV: $${navUSD} USD / ${navTHB} THB | Invested: ${investedTHB} THB | Return: ${returnPct}%`);
+console.log(`\nNAV: $${navUSD} USD / ${navTHB} THB (cash: ${round2(state.cashTHB ?? 0)} THB) | Invested: ${investedTHB} THB | Return: ${returnPct}%`);
 
 // ── F) Append/overwrite history entry (idempotent) ────────────────────────────
 
@@ -221,6 +228,7 @@ const entry = {
   fxUSDTHB:    round2(fxRate),
   navUSD,
   navTHB,
+  cashTHB:      round2(state.cashTHB ?? 0),
   investedTHB,
   returnPct,
   buys:         doBuy ? buys : {},
