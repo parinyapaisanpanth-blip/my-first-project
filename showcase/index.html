@@ -245,30 +245,15 @@
       background: var(--paper-2); border: 1.5px solid var(--rule); border-radius: 16px;
       height: 400px; padding: 0; position: relative; overflow: hidden;
     }
-    .chart-frame .grid {
-      position: absolute; inset: 22px;
-      background-image:
-        linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px);
-      background-size: 40px 40px; opacity: .6; border-radius: 8px;
-    }
-    .chart-frame .label {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%) rotate(-2deg);
-      background: var(--paper); border: 1.5px dashed var(--ink-3); border-radius: 10px;
-      padding: 14px 22px; font-family: var(--script); font-size: 22px; color: var(--ink-2);
-      box-shadow: 4px 4px 0 var(--rule);
-    }
-    .chart-frame .scribble-arrow { position: absolute; font-family: var(--script); color: var(--sage-2); font-size: 20px; }
-    .chart-frame .sa1 { top: 38px; left: 64px; transform: rotate(-8deg); }
-    .chart-frame .sa2 { bottom: 38px; right: 64px; transform: rotate(4deg); color: var(--stamp); }
-
     .levels { margin-top: 28px; background: var(--paper); border: 1.5px solid var(--rule); border-radius: 16px; overflow: hidden; }
     .levels table { width: 100%; border-collapse: collapse; }
     .levels th, .levels td { text-align: left; padding: 16px 22px; font-size: 15px; border-bottom: 1px dashed var(--rule); }
     .levels th { font-family: var(--display); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); background: var(--paper-2); border-bottom: 1.5px solid var(--rule); }
     .levels tr:last-child td { border-bottom: none; }
     .levels tr:hover td { background: rgba(125,139,93,.06); }
+    .levels tbody tr { cursor: pointer; }
+    .levels tbody tr.is-active td { background: rgba(200,211,238,.35); }
+    .levels-hint { font-family: var(--script); font-size: 15px; color: var(--ink-3); text-align: right; margin-top: 10px; }
     .ticker-col { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); letter-spacing: 0.01em; }
     .num { font-family: var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
     .num.up { color: var(--sage-2); }
@@ -306,9 +291,8 @@
       display: flex; flex-direction: column; gap: 14px;
       box-shadow: 4px 4px 0 var(--rule-soft);
     }
-    .agent:nth-child(1) { transform: rotate(-0.6deg); }
-    .agent:nth-child(2) { transform: rotate(0.4deg); }
-    .agent:nth-child(3) { transform: rotate(-0.3deg); }
+    .agent:nth-child(odd)  { transform: rotate(-0.5deg); }
+    .agent:nth-child(even) { transform: rotate(0.4deg); }
     .agent-vol {
       position: absolute; top: -14px; left: 22px;
       background: var(--sage-2); color: var(--paper);
@@ -448,6 +432,53 @@
       font-family: var(--script); color: var(--ink-3); font-size: 18px;
     }
 
+    /* ── WORKFLOW ── */
+    .wf-flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .wf-input {
+      background: var(--ink); color: var(--paper); border-radius: 16px;
+      padding: 22px 32px; text-align: center; max-width: 420px; width: 100%;
+      box-shadow: 4px 4px 0 rgba(28,29,34,.18);
+    }
+    .wf-input-code { font-family: var(--script); font-size: 34px; font-weight: 700; line-height: 1; }
+    .wf-input-code .cmd { color: var(--highlight); }
+    .wf-input-code .ticker { color: var(--sage-soft); }
+    .wf-input-sub { font-size: 13.5px; color: rgba(239,230,210,.65); margin-top: 8px; }
+    .wf-arrow { display: flex; justify-content: center; padding: 6px 0; color: var(--sage-2); }
+    .wf-arrow svg { width: 20px; height: 34px; stroke: currentColor; stroke-width: 2; fill: none; }
+    .wf-wave-bar { display: flex; align-items: center; gap: 14px; width: 100%; margin: 18px 0 14px; }
+    .wf-wave-bar::before, .wf-wave-bar::after { content: ''; flex: 1; border-top: 1.5px dashed var(--rule); }
+    .wf-wave-stamp {
+      background: var(--sage-2); color: var(--paper); padding: 5px 16px; border-radius: 6px;
+      font-family: var(--display); font-weight: 600; font-size: 11px;
+      letter-spacing: 0.14em; box-shadow: 2px 2px 0 var(--sage-deep); white-space: nowrap;
+    }
+    .wf-group { font-family: var(--script); font-size: 18px; color: var(--ink-3); text-align: center; margin-bottom: 12px; font-style: italic; }
+    .wf-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
+    @media (max-width: 880px) { .wf-row { grid-template-columns: 1fr; } }
+    .wf-card {
+      background: var(--paper); border: 1.5px solid var(--rule); border-radius: 14px;
+      padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 6px;
+      box-shadow: 3px 3px 0 var(--rule-soft);
+    }
+    .wf-card:nth-child(1) { transform: rotate(-0.4deg); }
+    .wf-card:nth-child(2) { transform: rotate(0.3deg); }
+    .wf-card:nth-child(3) { transform: rotate(-0.2deg); }
+    .wf-card-name { font-family: var(--script); font-size: 26px; color: var(--ink); font-weight: 700; line-height: 1; }
+    .wf-card-role { font-family: var(--display); font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.13em; font-weight: 600; }
+    .wf-card-desc { font-size: 13px; color: var(--ink-2); line-height: 1.5; margin-top: 2px; }
+    .wf-output {
+      background: rgba(58,92,193,.06); border: 1.5px dashed var(--sage); border-radius: 14px;
+      padding: 18px 28px; width: 100%; text-align: center; margin-top: 6px;
+      font-family: var(--display); font-weight: 500; font-size: 16px; color: var(--ink);
+    }
+    .wf-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 26px; }
+    .wf-chip {
+      background: var(--paper-2); border: 1px solid var(--rule); border-radius: 999px;
+      padding: 7px 16px; font-size: 13px; color: var(--ink-2);
+      font-family: var(--display); font-weight: 500; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .wf-chip-cmd { font-family: var(--script); font-size: 17px; color: var(--sage-2); font-weight: 700; }
+
     /* ── DISCLAIMER ── */
     .disclaimer {
       border: 1.5px dashed var(--rule); border-radius: 12px;
@@ -519,6 +550,10 @@
       <a href="#agents">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.5"/><path d="M3 20c1-3 4-5 6-5s5 2 6 5"/><path d="M14 20c.5-2 2-3.5 3-3.5s2.5 1.5 3 3.5"/></svg>
         ทีม AI
+      </a>
+      <a href="#workflow">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M7 5h10M5 7v8a1 1 0 0 0 1 1h4m7-9v8a1 1 0 0 1-1 1h-4"/></svg>
+        ทีมทำงานยังไง
       </a>
       <a href="#dca">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18"/><path d="M16 7H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H7"/></svg>
@@ -610,24 +645,7 @@
       </div>
 
       <div class="chart-frame">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
-          <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-          {
-            "autosize": true,
-            "symbol": "NASDAQ:AAPL",
-            "interval": "D",
-            "timezone": "Asia/Bangkok",
-            "theme": "light",
-            "style": "1",
-            "locale": "en",
-            "allow_symbol_change": true,
-            "hide_side_toolbar": true,
-            "watchlist": ["NASDAQ:AAPL","NASDAQ:NVDA","NASDAQ:MSFT","NASDAQ:GOOGL","NYSE:TSM"],
-            "support_host": "https://www.tradingview.com"
-          }
-          </script>
-        </div>
+        <div class="tradingview-widget-container" style="height:100%;width:100%"></div>
       </div>
 
       <div class="levels">
@@ -636,31 +654,31 @@
             <tr><th>Ticker</th><th>แนวรับ</th><th>แนวต้าน</th><th>มุมมอง</th></tr>
           </thead>
           <tbody>
-            <tr>
+            <tr data-tv="NASDAQ:AAPL">
               <td><span class="ticker-col">AAPL</span></td>
               <td><span class="num up">182.40</span></td>
               <td><span class="num">198.20</span></td>
               <td><span class="view bull">ทยอยสะสม ↗</span></td>
             </tr>
-            <tr>
+            <tr data-tv="NASDAQ:NVDA">
               <td><span class="ticker-col">NVDA</span></td>
               <td><span class="num up">112.80</span></td>
               <td><span class="num">138.50</span></td>
               <td><span class="view bull">ถือยาว ★</span></td>
             </tr>
-            <tr>
+            <tr data-tv="NASDAQ:MSFT">
               <td><span class="ticker-col">MSFT</span></td>
               <td><span class="num up">405.00</span></td>
               <td><span class="num">438.00</span></td>
               <td><span class="view wait">รอ pullback</span></td>
             </tr>
-            <tr>
+            <tr data-tv="NASDAQ:GOOGL">
               <td><span class="ticker-col">GOOGL</span></td>
               <td><span class="num up">158.20</span></td>
               <td><span class="num">175.00</span></td>
               <td><span class="view bull">ทยอยสะสม ↗</span></td>
             </tr>
-            <tr>
+            <tr data-tv="NYSE:TSM">
               <td><span class="ticker-col">TSM</span></td>
               <td><span class="num up">142.50</span></td>
               <td><span class="num">168.00</span></td>
@@ -669,6 +687,7 @@
           </tbody>
         </table>
       </div>
+      <p class="levels-hint">↗ คลิก ticker เพื่อดูกราฟ</p>
     </section>
 
     <hr class="dashed-rule">
@@ -740,21 +759,21 @@
     <section id="agents">
       <div class="sec-head">
         <h2>ทีม AI ของผม</h2>
-        <span class="sub">three helpers, one notebook</span>
+        <span class="sub">eight agents, one notebook</span>
       </div>
       <div class="agents">
         <article class="agent">
           <span class="agent-vol">VOL 1</span>
           <div class="agent-head">
             <div class="agent-ico">
-              <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h4"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
             </div>
             <div>
               <div class="agent-role">10-K Reader</div>
               <h3 class="agent-name">mint</h3>
             </div>
           </div>
-          <p class="agent-desc">อ่านงบประจำปี 10-K ทั้งฉบับ แล้วสรุปประเด็นความเสี่ยง โครงสร้างรายได้ และ red flag สำคัญใน 5 นาที</p>
+          <p class="agent-desc">อ่าน 10-K สรุป business model, margin trend, capital allocation, revenue durability</p>
           <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
         </article>
         <article class="agent">
@@ -768,21 +787,91 @@
               <h3 class="agent-name">arm</h3>
             </div>
           </div>
-          <p class="agent-desc">ฟัง earnings call ทุกไตรมาส แกะ tone ผู้บริหาร จับ guidance ที่เปลี่ยนไป และไฮไลต์ Q&amp;A กับ analyst</p>
+          <p class="agent-desc">อ่าน transcript ไตรมาสล่าสุด ดึง revenue/EPS/margin + guidance + management tone</p>
           <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
         </article>
         <article class="agent">
           <span class="agent-vol">VOL 3</span>
           <div class="agent-head">
             <div class="agent-ico">
-              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M8 11h6M11 8v6"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M4.9 4.9a9.5 9.5 0 0 0 0 13.4M8.6 8.6a4.5 4.5 0 0 0 0 6.3M15 8.6a4.5 4.5 0 0 1 0 6.3m2.5-9.9a9.5 9.5 0 0 1 0 13.4"/><circle cx="12" cy="12" r="1.5"/></svg>
             </div>
             <div>
               <div class="agent-role">News &amp; Sentiment</div>
               <h3 class="agent-name">nayoey</h3>
             </div>
           </div>
-          <p class="agent-desc">ตามข่าวจาก 40+ แหล่ง คัดเฉพาะข่าวที่ขยับราคาได้ พร้อม sentiment score และ context จากข่าวเก่าที่เกี่ยวกัน</p>
+          <p class="agent-desc">WebSearch ข่าว 7 วัน + analyst upgrade/downgrade + catalyst ที่กำลังจะมา</p>
+          <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
+        </article>
+        <article class="agent">
+          <span class="agent-vol">VOL 4</span>
+          <div class="agent-head">
+            <div class="agent-ico">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8"/><path d="M12 3c-2.5 2.5-4 5.5-4 9s1.5 6.5 4 9M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9"/></svg>
+            </div>
+            <div>
+              <div class="agent-role">Macro &amp; Regime</div>
+              <h3 class="agent-name">amp</h3>
+            </div>
+          </div>
+          <p class="agent-desc">สแกน Fed/ดอกเบี้ย/sector rotation บอก sector ของหุ้นได้หรือเสียจาก regime นี้</p>
+          <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
+        </article>
+        <article class="agent">
+          <span class="agent-vol">VOL 5</span>
+          <div class="agent-head">
+            <div class="agent-ico">
+              <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.3H22l-6.3 4.6 2.4 7.3L12 17.2l-6.1 4 2.4-7.3L2 9.3h7.6z"/></svg>
+            </div>
+            <div>
+              <div class="agent-role">Conviction Scorer</div>
+              <h3 class="agent-name">earth</h3>
+            </div>
+          </div>
+          <p class="agent-desc">ให้คะแนน conviction 5 ด้าน (business / management / valuation / timing / catalyst) รวม /25</p>
+          <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
+        </article>
+        <article class="agent">
+          <span class="agent-vol">VOL 6</span>
+          <div class="agent-head">
+            <div class="agent-ico">
+              <svg viewBox="0 0 24 24"><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="7" r="2"/><line x1="6" y1="6" x2="6" y2="18"/><path d="M8 4h6a4 4 0 0 1 4 4"/><path d="M18 9v9"/></svg>
+            </div>
+            <div>
+              <div class="agent-role">Thesis Tracker</div>
+              <h3 class="agent-name">frame</h3>
+            </div>
+          </div>
+          <p class="agent-desc">เทียบ brief ทุกเวอร์ชันกับ thesis history บอก thesis เปลี่ยนไหน + kill condition ใกล้ trigger</p>
+          <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
+        </article>
+        <article class="agent">
+          <span class="agent-vol">VOL 7</span>
+          <div class="agent-head">
+            <div class="agent-ico">
+              <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12a9 3 0 0 1-18 0"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/></svg>
+            </div>
+            <div>
+              <div class="agent-role">Knowledge Librarian</div>
+              <h3 class="agent-name">nontr</h3>
+            </div>
+          </div>
+          <p class="agent-desc">ดูแล knowledge/ ให้สะอาด sync INDEX, รวม entry ซ้ำ, ลบไฟล์หมดอายุอัตโนมัติ</p>
+          <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
+        </article>
+        <article class="agent">
+          <span class="agent-vol">VOL 8</span>
+          <div class="agent-head">
+            <div class="agent-ico">
+              <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h12"/><circle cx="19" cy="17" r="3"/><path d="m23 21-1.5-1.5"/></svg>
+            </div>
+            <div>
+              <div class="agent-role">Watchlist Scanner</div>
+              <h3 class="agent-name">watchlist-scout</h3>
+            </div>
+          </div>
+          <p class="agent-desc">สแกนหลายหุ้นพร้อมกัน (เรียก mint + nayoey) แล้วออก digest 1 หน้าว่าตัวไหนน่าสนใจ</p>
           <div class="agent-status"><span class="dot-green"></span>พร้อมทำงาน</div>
         </article>
       </div>
@@ -791,7 +880,91 @@
     <hr class="dashed-rule">
     <div class="page-mark">page 6</div>
 
-    <!-- §6 DCA -->
+    <!-- §6 WORKFLOW -->
+    <section id="workflow">
+      <div class="sec-head">
+        <h2>ทีมทำงานยังไง</h2>
+        <span class="sub">how a brief gets made</span>
+      </div>
+      <div class="wf-flow">
+
+        <!-- Input -->
+        <div class="wf-input">
+          <div class="wf-input-code"><span class="cmd">/brief</span> <span class="ticker">TICKER</span></div>
+          <div class="wf-input-sub">→ อ่าน CLAUDE.md โหลด investing voice</div>
+        </div>
+
+        <div class="wf-arrow" aria-hidden="true">
+          <svg viewBox="0 0 20 34"><path d="M10 2v26"/><path d="M4 22 10 30 16 22"/></svg>
+        </div>
+
+        <!-- Wave 1 -->
+        <div class="wf-wave-bar"><span class="wf-wave-stamp">เวฟ 1 · ขนานกัน</span></div>
+        <p class="wf-group">เก็บวัตถุดิบ</p>
+        <div class="wf-row">
+          <div class="wf-card">
+            <div class="wf-card-name">mint</div>
+            <div class="wf-card-role">10-K Reader</div>
+            <div class="wf-card-desc">อ่าน 10-K สรุป business model, margin trend, capital allocation</div>
+          </div>
+          <div class="wf-card">
+            <div class="wf-card-name">arm</div>
+            <div class="wf-card-role">Earnings Call</div>
+            <div class="wf-card-desc">อ่าน transcript ล่าสุด ดึง revenue/EPS/margin + guidance + tone</div>
+          </div>
+          <div class="wf-card">
+            <div class="wf-card-name">nayoey</div>
+            <div class="wf-card-role">News &amp; Sentiment</div>
+            <div class="wf-card-desc">WebSearch ข่าว 7 วัน + analyst move + catalyst ที่กำลังจะมา</div>
+          </div>
+        </div>
+
+        <div class="wf-arrow" aria-hidden="true">
+          <svg viewBox="0 0 20 34"><path d="M10 2v26"/><path d="M4 22 10 30 16 22"/></svg>
+        </div>
+
+        <!-- Wave 2 -->
+        <div class="wf-wave-bar"><span class="wf-wave-stamp">เวฟ 2 · รอเวฟ 1 เสร็จ แล้วรันขนานกัน</span></div>
+        <p class="wf-group">เสริมบริบท + ให้คะแนน</p>
+        <div class="wf-row">
+          <div class="wf-card">
+            <div class="wf-card-name">amp</div>
+            <div class="wf-card-role">Macro &amp; Regime</div>
+            <div class="wf-card-desc">สแกน Fed/ดอกเบี้ย/sector rotation — sector ได้หรือเสียจาก regime นี้</div>
+          </div>
+          <div class="wf-card">
+            <div class="wf-card-name">frame</div>
+            <div class="wf-card-role">Thesis Tracker</div>
+            <div class="wf-card-desc">เทียบ thesis history เขียน entry ใหม่ + flag kill condition ที่ใกล้ trigger</div>
+          </div>
+          <div class="wf-card">
+            <div class="wf-card-name">earth</div>
+            <div class="wf-card-role">Conviction Scorer</div>
+            <div class="wf-card-desc">ให้คะแนน conviction 5 ด้าน (business/management/valuation/timing/catalyst) /25</div>
+          </div>
+        </div>
+
+        <div class="wf-arrow" aria-hidden="true">
+          <svg viewBox="0 0 20 34"><path d="M10 2v26"/><path d="M4 22 10 30 16 22"/></svg>
+        </div>
+
+        <!-- Output -->
+        <div class="wf-output">brief 10 ส่วน → เซฟ <span class="hl">briefs/&lt;TICKER&gt;.md</span> + โชว์ในแชต</div>
+
+        <!-- Extra chips -->
+        <div class="wf-chips">
+          <div class="wf-chip"><span class="wf-chip-cmd">/compare</span> → earth ให้คะแนนหลายตัวเทียบกัน</div>
+          <div class="wf-chip"><span class="wf-chip-cmd">/clean</span> → nontr เคลียร์ knowledge/</div>
+          <div class="wf-chip"><span class="wf-chip-cmd">watchlist-scout</span> → สแกน watchlist หลายตัว</div>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="dashed-rule">
+    <div class="page-mark">page 7</div>
+
+    <!-- §7 DCA -->
     <section id="dca">
       <div class="sec-head">
         <h2>มุม DCA</h2>
@@ -830,9 +1003,9 @@
     </section>
 
     <hr class="dashed-rule">
-    <div class="page-mark">page 7</div>
+    <div class="page-mark">page 8</div>
 
-    <!-- §7 METHODOLOGY -->
+    <!-- §8 METHODOLOGY -->
     <section id="methodology">
       <div class="sec-head">
         <h2>บทวิเคราะห์มาจากไหน</h2>
@@ -867,13 +1040,13 @@
           <div class="method-meta"><span class="by">by</span> nayoey</div>
         </div>
       </div>
-      <div class="method-note">ทุก brief <span class="hl">อ้างอิงเอกสารจริง</span> ไม่ใช่เดาจากพาดหัวข่าว</div>
+      <div class="method-note">ทุก brief <span class="hl">อ้างอิงเอกสารจริง</span> ไม่ใช่เดาจากพาดหัวข่าว — จากนั้น amp เสริมภาพ macro, earth ให้คะแนน conviction, frame ติดตามว่า thesis เปลี่ยนไปไหม และ nontr ดูแลคลังความรู้ให้สะอาดอยู่เสมอ</div>
     </section>
 
     <hr class="dashed-rule">
-    <div class="page-mark">page 8</div>
+    <div class="page-mark">page 9</div>
 
-    <!-- §8 LIBRARY -->
+    <!-- §9 LIBRARY -->
     <section id="library">
       <div class="lib-head-row">
         <div class="sec-head" style="margin-bottom:0;">
@@ -991,6 +1164,7 @@
 </div>
 
 <script>
+  // Smooth scroll
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
       const id = a.getAttribute('href').slice(1);
@@ -1002,11 +1176,41 @@
     });
   });
 
+  // TradingView dynamic loader
+  function loadChart(tvSymbol) {
+    const container = document.querySelector('.tradingview-widget-container');
+    if (!container) return;
+    container.innerHTML = '<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>';
+    const s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    s.async = true;
+    s.textContent = JSON.stringify({
+      autosize: true, symbol: tvSymbol, interval: 'D',
+      timezone: 'Asia/Bangkok', theme: 'light', style: '1', locale: 'en',
+      allow_symbol_change: true, hide_side_toolbar: true,
+      watchlist: ['NASDAQ:AAPL','NASDAQ:NVDA','NASDAQ:MSFT','NASDAQ:GOOGL','NYSE:TSM'],
+      support_host: 'https://www.tradingview.com'
+    });
+    container.appendChild(s);
+  }
+  loadChart('NASDAQ:AAPL');
+
+  // Levels table: click row to change chart symbol
+  document.querySelectorAll('.levels tbody tr[data-tv]').forEach(tr => {
+    tr.addEventListener('click', () => {
+      document.querySelectorAll('.levels tbody tr').forEach(r => r.classList.remove('is-active'));
+      tr.classList.add('is-active');
+      loadChart(tr.dataset.tv);
+      const frame = document.querySelector('.chart-frame');
+      if (frame) frame.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+
   // Scroll-spy: sync Pages nav with scroll position
   (function() {
     const pageLinks = Array.from(document.querySelectorAll('.side-nav:not(.toc) a'));
-    // Section IDs in document order (excluding #top = full main element)
-    const orderedIds = ['market', 'news', 'agents', 'dca', 'library'];
+    const orderedIds = ['market', 'news', 'agents', 'workflow', 'dca', 'library'];
     const sections = orderedIds.map(id => document.getElementById(id)).filter(Boolean);
 
     function setActive(id) {
@@ -1015,16 +1219,14 @@
       if (match) match.classList.add('active');
     }
 
-    setActive('top'); // default on load
+    setActive('top');
 
     const intersecting = new Set();
-
     const obs = new IntersectionObserver(entries => {
       entries.forEach(e => {
         if (e.isIntersecting) intersecting.add(e.target.id);
         else intersecting.delete(e.target.id);
       });
-      // Pick deepest section in doc order that's in the top zone
       let active = null;
       for (const id of orderedIds) {
         if (intersecting.has(id)) active = id;
