@@ -1,3 +1,6 @@
+> ⚠️ UNVERIFIED — ยังไม่มีเอกสารต้นทางใน sources/ รองรับ brief นี้ ตัวเลข/ข้ออ้างยังไม่ผ่านการ verify
+> ต้องเพิ่ม 10-K + earnings call ที่ sources/NVDA/ แล้ว re-run /brief ก่อนใช้จริง
+
 # NVIDIA (NVDA) — Research Brief
 *Generated: 2026-05-15*
 
