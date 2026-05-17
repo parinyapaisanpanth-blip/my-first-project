@@ -16,16 +16,17 @@
 
 | ตัว | บทบาท | รันที่ไหน | ค่าใช้จ่าย |
 |---|---|---|---|
-| Claude (Agent SDK) | orchestrate + reasoning + เขียน brief/synthesis | GitHub Actions (headless) | ตาม token |
-| Gemini API | RAG อ่านเอกสารยาว + Google Search grounding (แทน NotebookLM) | เรียกจาก job | มี free tier |
-| xAI Grok | ข่าว/sentiment real-time จาก X (เปิดใช้เฟส 1) | เรียกจาก job | ตาม API |
+| Gemini API (`gemini-2.0-flash`) | ข่าวรายวัน + Google Search grounding (เฟส 1 primary) | GitHub Actions | free tier |
+| GitHub Models (`gpt-4o-mini`) | fallback ถ้า Gemini ล้ม — ยังไม่ implement (TODO) | GitHub Actions | ฟรี |
+| Claude (Agent SDK) | orchestrate + reasoning + brief/synthesis — **deferred เฟส 3+** | GitHub Actions | ตาม token |
+| xAI Grok | ข่าว/sentiment จาก X — **deferred เฟส 3+** | เรียกจาก job | ตาม API |
 | Market data | ราคาหุ้นรายวันสำหรับตีมูลค่าพอร์ต | เรียกจาก job | free tier |
 
 **Market data decision (ตัดสินแล้ว):** Finnhub = primary (free 60 call/นาที), Twelve Data = fallback เมื่อ Finnhub error/rate-limit
 
 **Logo:** ใช้ field `logo` จาก Finnhub company-profile2 endpoint (ไม่ต้องเพิ่ม service โลโก้แยก)
 
-ChatGPT / Hermes: ข้ามไปก่อน (ChatGPT ซ้ำ Claude, Hermes คุ้มเฉพาะตอนต้องฟรี/ออฟไลน์)
+ChatGPT / Hermes / xAI Grok: deferred เฟส 3+ (Gemini ฟรีเพียงพอสำหรับเฟส 1)
 
 ## C. ที่รัน automation — GitHub Actions (ไม่ใช่ Vercel Cron)
 
@@ -65,7 +66,7 @@ showcase/
 | เฟส | ทำอะไร | depends on |
 |---|---|---|
 | 0 — Prereq | push repo ขึ้น GitHub, สมัคร API key (Anthropic/Gemini/Grok/Finnhub/Twelve Data), ใส่ GitHub Secrets, ลง Claude Agent SDK | — |
-| 1 — ข่าวรายวัน | scout-news + .github/workflows/daily.yml (step ข่าว) + Nontr cleanup + auto-commit | 0 |
+| 1 — ข่าวรายวัน | scout-news + .github/workflows/daily.yml + expiry cleanup + auto-commit — **done (pending manual verify: Actions tab → Run workflow)** | 0 |
 | 2 — Portfolio model | portfolio/state.json + rules.md + กติกา DCA (ยังไม่ automate) + seed เริ่มต้น | 0 |
 | 3 — dca-pilot | agent จำลองซื้อ + ดึงราคา Finnhub/Twelve Data + เขียน history.json (NAV รายวัน) เสียบ cron | 1, 2 |
 | 4 — เว็บอัปเดตเอง | regenerate index.html จาก state/history + Vercel auto-deploy on push | 3 |
@@ -80,6 +81,8 @@ showcase/
 - [x] stack = Claude + Gemini (+ Grok ตั้งแต่เฟส 1)
 
 ตัดสินเพิ่ม (รอบนี้):
+
+- [x] stack เฟส 1 = ฟรี (Gemini primary + GitHub Models fallback TODO); Claude/xAI deferred เฟส 3+
 
 - [x] Watchlist = AAPL, NVDA, MSFT, GOOGL, AMZN, META, TSM (7 ตัว — เพิ่ม AMZN/META ให้ครบ mega-cap tech, แก้ได้ภายหลัง) + ดึงโลโก้จาก Finnhub
 - [x] GitHub repo = **public**
