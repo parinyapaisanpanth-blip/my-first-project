@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trust me bro — AI Investment Research System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg: #f5f0e8;
+      --paper: #fdfaf4;
+      --blue: #2a4db7;
+      --blue-light: #eef1fb;
+      --blue-mid: #c5cef5;
+      --green: #1a7a4a;
+      --green-light: #e6f5ee;
+      --amber: #b45309;
+      --amber-light: #fef3c7;
+      --red: #b91c1c;
+      --red-light: #fee2e2;
+      --purple: #6d28d9;
+      --purple-light: #ede9fe;
+      --teal: #0f766e;
+      --teal-light: #ccfbf1;
+      --gray: #64748b;
+      --gray-light: #f1f5f9;
+      --border: #e2d9c4;
+      --text: #1e1b14;
+      --text-muted: #78716c;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: var(--sans);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(245,240,232,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex; align-items: center; gap: 32px;
+      height: 56px;
+    }
+    .nav-logo {
+      font-weight: 700; font-size: 18px; color: var(--blue);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-logo span { font-family: var(--mono); }
+    nav a {
+      text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500;
+      transition: color .15s;
+    }
+    nav a:hover { color: var(--blue); }
+    .nav-spacer { flex: 1; }
+    .nav-badge {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      background: var(--blue); color: #fff;
+      padding: 3px 10px; border-radius: 100px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: 900px; margin: 0 auto;
+      padding: 72px 32px 48px;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--blue-light); border: 1px solid var(--blue-mid);
+      color: var(--blue); font-size: 12px; font-weight: 600;
+      padding: 4px 14px; border-radius: 100px;
+      margin-bottom: 24px; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px); font-weight: 700;
+      line-height: 1.15; margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p {
+      font-size: 18px; color: var(--text-muted);
+      max-width: 600px; margin: 0 auto 36px;
+    }
+    .hero-commands {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+    }
+    .cmd-pill {
+      font-family: var(--mono); font-size: 13px; font-weight: 500;
+      background: var(--paper); border: 1px solid var(--border);
+      color: var(--blue); padding: 6px 16px; border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+
+    /* ── SECTION ── */
+    section {
+      max-width: 1080px; margin: 0 auto;
+      padding: 16px 32px 64px;
+    }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(22px, 3vw, 30px); font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .section-sub {
+      font-size: 15px; color: var(--text-muted);
+      margin-bottom: 36px; max-width: 560px;
+    }
+    hr.divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 0 32px 0;
+    }
+
+    /* ── WORKFLOW CARD ── */
+    .workflow-wrap {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.05);
+      overflow-x: auto;
+    }
+    .wf-title {
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      color: var(--blue); letter-spacing: .05em; text-transform: uppercase;
+      margin-bottom: 28px; display: flex; align-items: center; gap: 8px;
+    }
+    .wf-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* PIPELINE ROWS */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 640px;
+    }
+
+    .pipe-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* trigger box */
+    .pipe-trigger {
+      background: var(--blue);
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      min-width: 160px;
+      text-align: center;
+    }
+    .pipe-trigger .pt-cmd {
+      font-family: var(--mono); font-size: 16px; font-weight: 600;
+    }
+    .pipe-trigger .pt-sub { font-size: 11px; opacity: .75; margin-top: 2px; }
+
+    /* arrow */
+    .pipe-arrow {
+      display: flex; align-items: center;
+      padding: 0 10px;
+      color: var(--text-muted); font-size: 18px;
+    }
+    .pipe-arrow-down {
+      display: flex; justify-content: center;
+      padding: 6px 0;
+      color: var(--text-muted); font-size: 20px;
+      margin-left: 80px;
+    }
+
+    /* step box */
+    .pipe-step {
+      background: var(--gray-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      min-width: 200px;
+      font-size: 13px;
+    }
+    .pipe-step .ps-label { font-weight: 600; color: var(--text); }
+    .pipe-step .ps-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* parallel group */
+    .pipe-parallel-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .pipe-parallel-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 4px 0 6px 0;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .pipe-parallel-label::before, .pipe-parallel-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 4px 0;
+    }
+    .agents-grid.two-col { grid-template-columns: repeat(2, 1fr); }
+
+    .agent-box {
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+    }
+    .agent-box .ab-name {
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      letter-spacing: .02em; margin-bottom: 4px;
+    }
+    .agent-box .ab-role { font-size: 11px; line-height: 1.5; }
+    .agent-box .ab-source {
+      margin-top: 6px; font-family: var(--mono); font-size: 10px;
+      opacity: .7; padding: 2px 6px; border-radius: 4px;
+      display: inline-block;
+    }
+
+    /* agent colors */
+    .ab-mint   { background: var(--green-light);  border-color: #bbf7d0; color: var(--green);  }
+    .ab-arm    { background: var(--amber-light);  border-color: #fde68a; color: var(--amber);  }
+    .ab-nayoey { background: var(--blue-light);   border-color: var(--blue-mid); color: var(--blue);   }
+    .ab-amp    { background: var(--teal-light);   border-color: #99f6e4; color: var(--teal);   }
+    .ab-frame  { background: var(--purple-light); border-color: #ddd6fe; color: var(--purple); }
+    .ab-earth  { background: var(--red-light);    border-color: #fecaca; color: var(--red);    }
+    .ab-nontr  { background: var(--gray-light);   border-color: var(--border); color: var(--gray); }
+
+    .ab-mint   .ab-source { background: #dcfce7; }
+    .ab-arm    .ab-source { background: #fef9c3; }
+    .ab-nayoey .ab-source { background: var(--blue-mid); }
+    .ab-amp    .ab-source { background: #ccfbf1; }
+    .ab-frame  .ab-source { background: #ede9fe; }
+    .ab-earth  .ab-source { background: #fee2e2; }
+    .ab-nontr  .ab-source { background: var(--border); }
+
+    /* output box */
+    .pipe-output {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .output-section {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+    }
+    .output-section .os-num {
+      font-family: var(--mono); font-weight: 700; font-size: 10px;
+      color: var(--blue); margin-bottom: 4px;
+    }
+    .output-section .os-name { font-weight: 600; color: var(--text); line-height: 1.4; }
+    .output-section .os-from { color: var(--text-muted); font-size: 10px; margin-top: 3px; }
+
+    /* ── AGENTS REFERENCE ── */
+    .agents-ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .agent-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
+      transition: box-shadow .15s, transform .15s;
+    }
+    .agent-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .ac-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .ac-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .ac-name { font-family: var(--mono); font-weight: 700; font-size: 15px; }
+    .ac-tag  { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+    .ac-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+    .ac-source {
+      font-family: var(--mono); font-size: 11px;
+      background: var(--gray-light); border: 1px solid var(--border);
+      color: var(--text-muted); padding: 4px 10px; border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ── KNOWLEDGE MAP ── */
+    .knowledge-tree {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      font-family: var(--mono); font-size: 13px;
+      line-height: 2;
+    }
+    .kt-line { display: flex; align-items: center; gap: 10px; }
+    .kt-indent { padding-left: 28px; }
+    .kt-indent2 { padding-left: 56px; }
+    .kt-folder { color: var(--amber); }
+    .kt-file { color: var(--blue); }
+    .kt-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: .05em;
+      padding: 1px 8px; border-radius: 100px; text-transform: uppercase;
+    }
+    .kt-badge.frame-owned { background: var(--purple-light); color: var(--purple); }
+    .kt-badge.nontr-owned { background: var(--teal-light); color: var(--teal); }
+    .kt-badge.user { background: var(--amber-light); color: var(--amber); }
+    .kt-comment { color: var(--text-muted); font-size: 11px; }
+
+    /* ── COMMANDS ── */
+    .commands-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .command-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .cc-cmd {
+      font-family: var(--mono); font-size: 15px; font-weight: 700;
+      color: var(--blue); margin-bottom: 6px;
+    }
+    .cc-syntax {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--text-muted); background: var(--gray-light);
+      padding: 4px 10px; border-radius: 6px;
+      margin-bottom: 10px; display: inline-block;
+    }
+    .cc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .cc-skill {
+      margin-top: 10px; font-size: 11px; color: var(--purple);
+      font-family: var(--mono); opacity: .8;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 40px 32px 56px;
+      color: var(--text-muted); font-size: 13px;
+    }
+    footer strong { color: var(--text); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      nav { padding: 0 16px; gap: 16px; }
+      section { padding: 16px 16px 48px; }
+      .hero { padding: 48px 16px 32px; }
+      .workflow-wrap { padding: 20px; }
+      .agents-grid { grid-template-columns: 1fr; }
+      .pipe-output { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>Tm</span> Trust me bro</div>
+  <a href="#workflow">Workflow</a>
+  <a href="#agents">Agents</a>
+  <a href="#knowledge">Knowledge</a>
+  <a href="#commands">Commands</a>
+  <div class="nav-spacer"></div>
+  <span class="nav-badge">v2 — Lesson 3</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+    AI Investment Research System
+  </div>
+  <h1>ระบบวิเคราะห์หุ้นด้วย<br><em>Multi-Agent</em> Pipeline</h1>
+  <p>พิมพ์ command เดียว — 8 agent ทำงานพร้อมกัน — ได้ brief 10 section พร้อม source ทุก bullet</p>
+  <div class="hero-commands">
+    <span class="cmd-pill">/brief AAPL</span>
+    <span class="cmd-pill">/learn macro fed-notes …</span>
+    <span class="cmd-pill">/clean</span>
+    <span class="cmd-pill">/compare AAPL NVDA</span>
+    <span class="cmd-pill">/earnings-recap</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- WORKFLOW -->
+<section id="workflow">
+  <div class="section-label">01 — How it works</div>
+  <div class="section-title">Agent Workflow</div>
+  <div class="section-sub">เมื่อพิมพ์ <code style="font-family:var(--mono);background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:4px;">/brief TICKER</code> ระบบรัน pipeline นี้อัตโนมัติ</div>
+
+  <div class="workflow-wrap">
+
+    <!-- STEP 0: Trigger -->
+    <div class="wf-title">▶ Pipeline — /brief TICKER</div>
+
+    <div class="pipeline">
+
+      <!-- ROW: trigger -->
+      <div class="pipe-row">
+        <div class="pipe-trigger">
+          <div class="pt-cmd">/brief AAPL</div>
+          <div class="pt-sub">slash command → company-brief skill</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="ps-label">📖 อ่าน CLAUDE.md</div>
+          <div class="ps-sub">โหลด investing voice ของ user ก่อน</div>
+        </div>
+      </div>
+
+      <div class="pipe-arrow-down">↓</div>
+
+      <!-- ROW: wave 1 parallel -->
+      <div class="pipe-parallel-wrap">
+        <div class="pipe-parallel-label">Wave 1 — Parallel (3 agents)</div>
+        <div class="agents-grid">
+          <div class="agent-box ab-mint">
+            <div class="ab-name">mint</div>
+            <div class="ab-role">Company snapshot + Fundamentals signals จาก 10-K</div>
+            <div class="ab-source">sources/AAPL/10-k-*.md</div>
+          </div>
+          <div class="agent-box ab-arm">
+            <div class="ab-name">arm</div>
+            <div class="ab-role">Latest earnings + guidance + management tone จาก call transcript</div>
+            <div class="ab-source">sources/AAPL/q*-call.md</div>
+          </div>
+          <div class="agent-box ab-nayoey">
+            <div class="ab-name">nayoey</div>
+            <div class="ab-role">News 7 วัน + analyst moves + upcoming catalysts</div>
+            <div class="ab-source">WebSearch only</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-arrow-down">↓</div>
+
+      <!-- ROW: assemble draft -->
+      <div class="pipe-row">
+        <div class="pipe-step" style="min-width:340px">
+          <div class="ps-label">🔀 รวม output Wave 1 → Draft brief sec 1–7</div>
+          <div class="ps-sub">orchestrator synthesize ก่อนส่งให้ Wave 2</div>
+        </div>
+      </div>
+
+      <div class="pipe-arrow-down">↓</div>
+
+      <!-- ROW: wave 2 parallel -->
+      <div class="pipe-parallel-wrap">
+        <div class="pipe-parallel-label">Wave 2 — Parallel (3 agents)</div>
+        <div class="agents-grid">
+          <div class="agent-box ab-amp">
+            <div class="ab-name">amp</div>
+            <div class="ab-role">Macro regime + sector impact ต่อ ticker</div>
+            <div class="ab-source">WebSearch + knowledge/macro/</div>
+          </div>
+          <div class="agent-box ab-frame">
+            <div class="ab-name">frame</div>
+            <div class="ab-role">Thesis delta จาก brief รอบก่อน + kill condition status</div>
+            <div class="ab-source">briefs/*.md + knowledge/thesis/</div>
+          </div>
+          <div class="agent-box ab-earth">
+            <div class="ab-name">earth</div>
+            <div class="ab-role">Conviction score 5 ด้าน /25 พร้อมเหตุผล</div>
+            <div class="ab-source">draft brief ที่ได้รับ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-arrow-down">↓</div>
+
+      <!-- ROW: final output -->
+      <div class="pipe-parallel-wrap">
+        <div class="pipe-parallel-label">Output — 10-section brief</div>
+        <div class="pipe-output">
+          <div class="output-section">
+            <div class="os-num">§ 1–2</div>
+            <div class="os-name">Company + Fundamentals</div>
+            <div class="os-from">← mint</div>
+          </div>
+          <div class="output-section">
+            <div class="os-num">§ 3</div>
+            <div class="os-name">Latest Earnings</div>
+            <div class="os-from">← arm</div>
+          </div>
+          <div class="output-section">
+            <div class="os-num">§ 4–6</div>
+            <div class="os-name">Bull/Bear + Kill + Questions</div>
+            <div class="os-from">← synthesis</div>
+          </div>
+          <div class="output-section">
+            <div class="os-num">§ 7</div>
+            <div class="os-name">Technical Snapshot</div>
+            <div class="os-from">← nayoey</div>
+          </div>
+          <div class="output-section">
+            <div class="os-num">§ 8</div>
+            <div class="os-name">Macro Context</div>
+            <div class="os-from">← amp</div>
+          </div>
+          <div class="output-section">
+            <div class="os-num">§ 9</div>
+            <div class="os-name">Thesis Tracker</div>
+            <div class="os-from">← frame</div>
+          </div>
+          <div class="output-section">
+            <div class="os-num">§ 10</div>
+            <div class="os-name">Conviction Score</div>
+            <div class="os-from">← earth</div>
+          </div>
+          <div class="output-section" style="background:var(--blue-light);border-color:var(--blue-mid);">
+            <div class="os-num" style="color:var(--blue)">💾</div>
+            <div class="os-name" style="color:var(--blue)">Save briefs/AAPL.md</div>
+            <div class="os-from">auto</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pipeline -->
+
+  </div><!-- /workflow-wrap -->
+
+  <!-- /learn side pipeline -->
+  <div style="margin-top: 24px;">
+    <div class="workflow-wrap">
+      <div class="wf-title">▶ Pipeline — /learn &amp; /clean (Knowledge Management)</div>
+      <div class="pipeline" style="min-width: 0;">
+
+        <div class="pipe-row" style="flex-wrap: wrap; gap: 12px;">
+          <div class="pipe-trigger" style="background: var(--teal); min-width: 140px;">
+            <div class="pt-cmd">/learn</div>
+            <div class="pt-sub">บันทึกข้อมูลใหม่</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="ps-label">knowledge-learn skill</div>
+            <div class="ps-sub">parse หมวด / หัวข้อ / expires</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="ps-label">สร้าง knowledge/&lt;หมวด&gt;/&lt;หัวข้อ&gt;.md</div>
+            <div class="ps-sub">พร้อม frontmatter + expires date</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="agent-box ab-nontr" style="padding: 10px 14px;">
+            <div class="ab-name">nontr</div>
+            <div class="ab-role">sync INDEX.md entry</div>
+          </div>
+        </div>
+
+        <div style="height: 16px;"></div>
+
+        <div class="pipe-row" style="flex-wrap: wrap; gap: 12px;">
+          <div class="pipe-trigger" style="background: var(--gray); min-width: 140px;">
+            <div class="pt-cmd">/clean</div>
+            <div class="pt-sub">ล้างข้อมูลหมดอายุ</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="agent-box ab-nontr" style="padding: 10px 14px;">
+            <div class="ab-name">nontr</div>
+            <div class="ab-role">scan tree → ลบ expired → rebuild INDEX</div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step">
+            <div class="ps-label">Sync Report</div>
+            <div class="ps-sub">ลบกี่ไฟล์, INDEX ล่าสุด</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<hr class="divider">
+
+<!-- AGENTS REFERENCE -->
+<section id="agents">
+  <div class="section-label">02 — Agent reference</div>
+  <div class="section-title">Agents ทั้งหมด</div>
+  <div class="section-sub">แต่ละ agent ทำงาน context-isolated — ห้ามอ่าน source ของกันและกัน</div>
+
+  <div class="agents-ref-grid">
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--green-light); color:var(--green);">🌿</div>
+        <div>
+          <div class="ac-name" style="color:var(--green);">mint</div>
+          <div class="ac-tag">Fundamentals analyst</div>
+        </div>
+      </div>
+      <div class="ac-desc">วิเคราะห์ 10-K ออก Company snapshot + margin trend + capital allocation ห้ามใช้ข้อมูลนอก 10-K</div>
+      <div class="ac-source">sources/&lt;TICKER&gt;/10-k-*.md</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--amber-light); color:var(--amber);">📞</div>
+        <div>
+          <div class="ac-name" style="color:var(--amber);">arm</div>
+          <div class="ac-tag">Earnings analyst</div>
+        </div>
+      </div>
+      <div class="ac-desc">อ่าน earnings call transcript ออกตัวเลขไตรมาสล่าสุด + guidance + management tone ห้ามแต่งตัวเลข</div>
+      <div class="ac-source">sources/&lt;TICKER&gt;/q*-call.md</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--blue-light); color:var(--blue);">🔍</div>
+        <div>
+          <div class="ac-name" style="color:var(--blue);">nayoey</div>
+          <div class="ac-tag">News scout</div>
+        </div>
+      </div>
+      <div class="ac-desc">WebSearch หา news 7 วัน + analyst moves + catalysts ห้ามทำนายตลาด รายงาน observable signals เท่านั้น</div>
+      <div class="ac-source">WebSearch only</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--teal-light); color:var(--teal);">🌊</div>
+        <div>
+          <div class="ac-name" style="color:var(--teal);">amp</div>
+          <div class="ac-tag">Macro analyst</div>
+        </div>
+      </div>
+      <div class="ac-desc">ดึง macro regime ปัจจุบัน (Fed, yield, rotation) + วิเคราะห์ว่า sector ของ ticker ได้หรือเสียประโยชน์</div>
+      <div class="ac-source">WebSearch + knowledge/macro/</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--purple-light); color:var(--purple);">🖼️</div>
+        <div>
+          <div class="ac-name" style="color:var(--purple);">frame</div>
+          <div class="ac-tag">Thesis tracker</div>
+        </div>
+      </div>
+      <div class="ac-desc">เปรียบเทียบ brief ทุก version กับ thesis history แล้ว append entry ใหม่ + แจ้ง kill condition ที่ใกล้ trigger</div>
+      <div class="ac-source">briefs/*.md + knowledge/thesis/</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--red-light); color:var(--red);">⚖️</div>
+        <div>
+          <div class="ac-name" style="color:var(--red);">earth</div>
+          <div class="ac-tag">Conviction scorer</div>
+        </div>
+      </div>
+      <div class="ac-desc">ให้คะแนน 5 ด้าน (Business / Management / Valuation / Timing / Catalyst) แต่ละด้าน 1–5 พร้อมเหตุผล</div>
+      <div class="ac-source">draft brief ที่ได้รับ</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:var(--gray-light); color:var(--gray);">📚</div>
+        <div>
+          <div class="ac-name" style="color:var(--gray);">nontr</div>
+          <div class="ac-tag">Knowledge librarian</div>
+        </div>
+      </div>
+      <div class="ac-desc">sync INDEX.md กับไฟล์จริง, รวม entry ซ้ำ, ลบไฟล์ที่ expires หมดแล้ว เรียกได้จาก /learn และ /clean</div>
+      <div class="ac-source">knowledge/ tree</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-icon" style="background:#fef9c3; color:#92400e;">🔭</div>
+        <div>
+          <div class="ac-name" style="color:#92400e;">watchlist-scout</div>
+          <div class="ac-tag">Watchlist scanner</div>
+        </div>
+      </div>
+      <div class="ac-desc">รับ list tickers หลายตัวพร้อมกัน ออก digest 1 หน้าว่าตัวไหนมีสัญญาณน่าสนใจ ไม่ต้อง brief ทีละตัว</div>
+      <div class="ac-source">WebSearch × N tickers</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- KNOWLEDGE MAP -->
+<section id="knowledge">
+  <div class="section-label">03 — Knowledge base</div>
+  <div class="section-title">โครงสร้าง knowledge/ folder</div>
+  <div class="section-sub">ข้อมูลที่บันทึกไว้ใช้ได้ข้ามเซสชัน — ไม่หายเมื่อปิด Claude Code</div>
+
+  <div class="knowledge-tree">
+    <div class="kt-line"><span class="kt-folder">📁</span> knowledge/</div>
+    <div class="kt-indent">
+      <div class="kt-line"><span class="kt-file">📄</span> INDEX.md &nbsp;<span class="kt-badge nontr-owned">nontr-owned</span> <span class="kt-comment">&nbsp;— สารบัญ entry ทั้งหมด</span></div>
+      <div class="kt-line"><span class="kt-folder">📁</span> macro/ &nbsp;<span class="kt-badge user">user + amp</span></div>
+      <div class="kt-indent2">
+        <div class="kt-line"><span class="kt-file">📄</span> fed-may-2026.md <span class="kt-comment">&nbsp;expires: 2026-08-14</span></div>
+      </div>
+      <div class="kt-line"><span class="kt-folder">📁</span> companies/ &nbsp;<span class="kt-badge user">user</span></div>
+      <div class="kt-line"><span class="kt-folder">📁</span> news/ &nbsp;<span class="kt-badge user">user</span></div>
+      <div class="kt-line"><span class="kt-folder">📁</span> dca/ &nbsp;<span class="kt-badge user">user</span></div>
+      <div class="kt-line"><span class="kt-folder">📁</span> thesis/ &nbsp;<span class="kt-badge frame-owned">frame-owned (append-only)</span></div>
+      <div class="kt-indent2">
+        <div class="kt-line"><span class="kt-file">📄</span> AAPL.md <span class="kt-comment">&nbsp;— 4 entries, latest: 2026-05-16</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+    <div style="background: var(--paper); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;">
+      <div style="font-size: 11px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">expires date</div>
+      <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">ทุกไฟล์มี expires — nontr จะ clean ให้อัตโนมัติเมื่อรัน /clean</div>
+    </div>
+    <div style="background: var(--paper); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;">
+      <div style="font-size: 11px; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">thesis/ append-only</div>
+      <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">ห้ามใช้ /learn ใน thesis/ — frame agent จัดการเองทุก brief</div>
+    </div>
+    <div style="background: var(--paper); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;">
+      <div style="font-size: 11px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;">cross-session memory</div>
+      <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">amp อ่าน knowledge/macro/ อัตโนมัติ — WebSearch น้อยลง token ประหยัดขึ้น</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- COMMANDS -->
+<section id="commands">
+  <div class="section-label">04 — Slash commands</div>
+  <div class="section-title">Commands ที่ใช้ได้</div>
+  <div class="section-sub">พิมพ์ใน Claude Code Window 2 (my-first-project)</div>
+
+  <div class="commands-grid">
+
+    <div class="command-card">
+      <div class="cc-cmd">/brief &lt;TICKER&gt;</div>
+      <div class="cc-syntax">/brief AAPL</div>
+      <div class="cc-desc">รัน 6-agent pipeline ออก brief 10 section พร้อม source ทุก bullet บันทึกที่ briefs/AAPL.md</div>
+      <div class="cc-skill">→ company-brief skill</div>
+    </div>
+
+    <div class="command-card">
+      <div class="cc-cmd">/learn &lt;หมวด&gt; &lt;หัวข้อ&gt; &lt;เนื้อหา&gt;</div>
+      <div class="cc-syntax">/learn macro fed-june Fed คง rate June 2026</div>
+      <div class="cc-desc">บันทึกข้อมูลลง knowledge base พร้อม expires อัตโนมัติ +90 วัน sync INDEX ผ่าน nontr</div>
+      <div class="cc-skill">→ knowledge-learn skill</div>
+    </div>
+
+    <div class="command-card">
+      <div class="cc-cmd">/clean</div>
+      <div class="cc-syntax">/clean</div>
+      <div class="cc-desc">เรียก nontr scan knowledge/ ทั้ง tree ลบไฟล์ expired rebuild INDEX แสดง Sync Report</div>
+      <div class="cc-skill">→ knowledge-clean skill</div>
+    </div>
+
+    <div class="command-card">
+      <div class="cc-cmd">/compare &lt;T1&gt; &lt;T2&gt;</div>
+      <div class="cc-syntax">/compare AAPL NVDA</div>
+      <div class="cc-desc">เปรียบเทียบ 2 ticker side-by-side ใน key metrics เหมาะสำหรับตัดสินใจ allocation</div>
+      <div class="cc-skill">→ compare-tickers skill</div>
+    </div>
+
+    <div class="command-card">
+      <div class="cc-cmd">/earnings-recap</div>
+      <div class="cc-syntax">/earnings-recap MSFT</div>
+      <div class="cc-desc">สรุป earnings ล่าสุดอย่างเดียว เร็วกว่า /brief เหมาะสำหรับ quick check หลัง earnings date</div>
+      <div class="cc-skill">→ earnings-recap skill</div>
+    </div>
+
+    <div class="command-card">
+      <div class="cc-cmd">/people-brief &lt;ชื่อ&gt;</div>
+      <div class="cc-syntax">/people-brief John Ternus</div>
+      <div class="cc-desc">research ประวัติผู้บริหาร track record การตัดสินใจ และ red flags ก่อน evaluate CEO transition</div>
+      <div class="cc-skill">→ people-brief skill</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DESIGN PRINCIPLES -->
+<section>
+  <div class="section-label">05 — Design principles</div>
+  <div class="section-title">กฎที่ทุก agent ยึดถือ</div>
+  <div class="section-sub">เพื่อให้ brief ใช้งานได้จริง ไม่ใช่แค่อ่านดูดี</div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;">
+    <div style="background: var(--paper); border-left: 3px solid var(--blue); border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: 3px solid var(--blue); padding: 16px 20px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">Source-first</div>
+      <div style="font-size: 13px; color: var(--text-muted);">ทุก bullet ใน brief ต้อง trace กลับไปหา source file ได้ ห้ามแต่งตัวเลขจากความจำ</div>
+    </div>
+    <div style="background: var(--paper); border-left: 3px solid var(--green); border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 16px 20px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">Context isolated</div>
+      <div style="font-size: 13px; color: var(--text-muted);">mint อ่านแค่ 10-K, arm อ่านแค่ call transcript — ไม่มี agent ข้ามอ่าน source ของกัน</div>
+    </div>
+    <div style="background: var(--paper); border-left: 3px solid var(--amber); border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: 3px solid var(--amber); padding: 16px 20px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">Honest &gt; Confident</div>
+      <div style="font-size: 13px; color: var(--text-muted);">ถ้าข้อมูลไม่พอ ระบุตรงๆ ว่า "ไม่มี source" ดีกว่า hallucinate ตัวเลขสวยหรู</div>
+    </div>
+    <div style="background: var(--paper); border-left: 3px solid var(--purple); border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: 3px solid var(--purple); padding: 16px 20px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">Thesis ไม่ใช่ religion</div>
+      <div style="font-size: 13px; color: var(--text-muted);">frame track delta ทุก brief + kill conditions ป้องกันไม่ให้ commitment bias กัด portfolio</div>
+    </div>
+    <div style="background: var(--paper); border-left: 3px solid var(--red); border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: 3px solid var(--red); padding: 16px 20px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">ไม่มี buy/sell rec</div>
+      <div style="font-size: 13px; color: var(--text-muted);">ระบบนี้ทำ research summary เท่านั้น decision ยังเป็นของคุณ 100%</div>
+    </div>
+    <div style="background: var(--paper); border-left: 3px solid var(--teal); border-radius: 0 10px 10px 0; border: 1px solid var(--border); border-left: 3px solid var(--teal); padding: 16px 20px;">
+      <div style="font-weight: 700; margin-bottom: 6px;">Token aware</div>
+      <div style="font-size: 13px; color: var(--text-muted);">knowledge/ เก็บข้อมูลถาวรลด WebSearch ซ้ำ — Haiku สำหรับงาน simple, Sonnet สำหรับ synthesis</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>สร้างด้วย <strong>Claude Code</strong> · ข้อมูลทั้งหมดเป็น research summary ไม่ใช่คำแนะนำซื้อขาย</p>
+  <p style="margin-top: 6px; opacity: .6;">my-first-project · last updated 2026-05-16</p>
+</footer>
+
+</body>
+</html>
