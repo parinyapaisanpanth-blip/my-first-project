@@ -23,6 +23,8 @@
 
 **Market data decision (ตัดสินแล้ว):** Finnhub = primary (free 60 call/นาที), Twelve Data = fallback เมื่อ Finnhub error/rate-limit
 
+**Logo:** ใช้ field `logo` จาก Finnhub company-profile2 endpoint (ไม่ต้องเพิ่ม service โลโก้แยก)
+
 ChatGPT / Hermes: ข้ามไปก่อน (ChatGPT ซ้ำ Claude, Hermes คุ้มเฉพาะตอนต้องฟรี/ออฟไลน์)
 
 ## C. ที่รัน automation — GitHub Actions (ไม่ใช่ Vercel Cron)
@@ -77,11 +79,17 @@ showcase/
 - [x] automation host = GitHub Actions; Vercel = static hosting/auto-deploy
 - [x] stack = Claude + Gemini (+ Grok ตั้งแต่เฟส 1)
 
-ยังต้องตอบก่อนเริ่ม:
+ตัดสินเพิ่ม (รอบนี้):
 
-- [ ] Watchlist เริ่มต้น (default = 5 ตัวในเว็บ: AAPL/NVDA/MSFT/GOOGL/TSM ?)
-- [ ] งบ DCA จำลอง: จำนวน/เดือน, ลงวันไหน, แบ่งน้ำหนักยังไง (เท่ากัน vs ตาม conviction)
-- [ ] GitHub repo: public (Actions ฟรี) หรือ private (โควตานาทีจำกัด)
+- [x] Watchlist = AAPL, NVDA, MSFT, GOOGL, AMZN, META, TSM (7 ตัว — เพิ่ม AMZN/META ให้ครบ mega-cap tech, แก้ได้ภายหลัง) + ดึงโลโก้จาก Finnhub
+- [x] GitHub repo = **public**
+- [x] งบ DCA = 10,000 / เดือน
+- [x] การแบ่งน้ำหนัก = ตาม conviction (Earth score) เป็น default, เท่ากันเป็น fallback ถ้ายังไม่มี brief/score — config ใน portfolio/rules.md
+
+ยังต้องตอบ (ไม่บล็อกเฟส 0 บล็อกเฟส 2-3):
+
+- [ ] สกุลงบ 10,000 = THB หรือ USD? (สมมติชั่วคราว = THB, แปลง USD ด้วย FX รายวันจาก market API — ยืนยันก่อนเฟส 3)
+- [ ] วันลง DCA ของเดือน (ผู้ใช้ "เลือกอีกที" — default = วันเทรดแรกของเดือน จนกว่าจะกำหนด)
 
 ## H. ค่าใช้จ่าย (คร่าว)
 
