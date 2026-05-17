@@ -211,7 +211,10 @@ if (doBuy) {
 
 let navUSD = 0;
 for (const [ticker, holding] of Object.entries(state.holdings)) {
-  if (prices[ticker]) navUSD += holding.shares * prices[ticker];
+  if (prices[ticker]) {
+    holding.lastPriceUSD = round2(prices[ticker]);
+    navUSD += holding.shares * prices[ticker];
+  }
 }
 navUSD = round2(navUSD);
 const navTHB      = round2(navUSD * fxRate + (state.cashTHB ?? 0));

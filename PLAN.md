@@ -1,6 +1,6 @@
 # Master Plan — DCA Auto-Portfolio + Daily News System
 
-> สถานะ: เฟส 0–2 done · อัปเดต 2026-05-17 · เฟส 3 (dca-pilot) รอสั่ง
+> สถานะ: เฟส 0–4 done · อัปเดต 2026-05-17 · เฟส 5 (hardening) รอสั่ง
 
 ## A. ภาพรวม & ข้อจำกัดที่ล็อกไว้
 
@@ -74,8 +74,8 @@ showcase/
 | 0 — Prereq | push repo ขึ้น GitHub, สมัคร API key (Anthropic/Gemini/Grok/Finnhub/Twelve Data), ใส่ GitHub Secrets, ลง Claude Agent SDK | — |
 | 1 — ข่าวรายวัน | scout-news + .github/workflows/daily.yml + expiry cleanup + auto-commit — **done** (known issue: TSM 13F-dump noise ยอมรับเป็น v1 แก้เฟส 5) | 0 |
 | 2 — Portfolio model | portfolio/state.json + rules.md + กติกา DCA (ยังไม่ automate) + seed เริ่มต้น — **done** | 0 |
-| 3 — dca-pilot | จำลองซื้อ DCA รายสัปดาห์ + NAV รายวัน (Finnhub quote + open.er-api FX, ไม่มี Claude/LLM ใน CI) — **done (pending verify: Run workflow → force_buy=true)** conviction = `portfolio/conviction.json` ที่ผู้ใช้ refresh เอง | 1, 2 |
-| 4 — เว็บอัปเดตเอง | regenerate index.html จาก state/history + Vercel auto-deploy on push | 3 |
+| 3 — dca-pilot | จำลองซื้อ DCA รายสัปดาห์ + NAV รายวัน (Finnhub quote + open.er-api FX, ไม่มี Claude/LLM ใน CI) — **done** conviction = `portfolio/conviction.json` ที่ผู้ใช้ refresh เอง | 1, 2 |
+| 4 — เว็บอัปเดตเอง | `scripts/render-showcase.mjs` regenerate `showcase/index.html` จาก state/history (JSON only, no API) + `<!-- DCA:START/END -->` marker + workflow auto-commit → Vercel auto-deploy on push — **done** | 3 |
 | 5 — Hardening | idempotent cron, error/retry, cost cap, log, กันรันซ้ำวันเดียวกัน | 1-4 |
 
 ## G. Decision
