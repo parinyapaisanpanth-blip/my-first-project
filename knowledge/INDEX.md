@@ -28,6 +28,7 @@ fed-may-2026 | Fed คงดอกเบี้ย 4.25-4.5% รอบ พ.ค. 2
 ## Thesis
 <!-- thesis history รายบริษัท ดูแลโดย Frame agent — ไฟล์อยู่ที่ thesis/<TICKER>.md -->
 
+AAPL | thesis history 4 entries: Services flywheel, ecosystem lock-in, conviction up→flat เพราะ macro headwind + Ternus transition | expires: never | knowledge/thesis/AAPL.md
 
 ---
 
