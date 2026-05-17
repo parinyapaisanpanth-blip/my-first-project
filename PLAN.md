@@ -1,6 +1,6 @@
 # Master Plan — DCA Auto-Portfolio + Daily News System
 
-> สถานะ: planning · อัปเดต 2026-05-17 · ยังไม่เริ่มลงมือ (รอ decision หมวด G ที่เหลือ)
+> สถานะ: เฟส 0–2 done · อัปเดต 2026-05-17 · เฟส 3 (dca-pilot) รอสั่ง
 
 ## A. ภาพรวม & ข้อจำกัดที่ล็อกไว้
 
@@ -17,7 +17,7 @@
 | ตัว | บทบาท | รันที่ไหน | ค่าใช้จ่าย |
 |---|---|---|---|
 | Finnhub company-news API | ข่าวรายวันต่อ ticker (เฟส 1 primary news source) | GitHub Actions | free tier |
-| Gemini API (`gemini-2.0-flash`) | sentiment batch — ไม่มี grounding (เฟส 1 optional) | GitHub Actions | free tier |
+| Gemini API (`gemini-2.0-flash`) | sentiment batch — ไม่มี grounding (เฟส 1 optional, ปัจจุบัน n/a quota free tier non-blocking) | GitHub Actions | free tier |
 | GitHub Models (`gpt-4o-mini`) | fallback ถ้า Gemini ล้ม — ยังไม่ implement (TODO) | GitHub Actions | ฟรี |
 | Claude (Agent SDK) | orchestrate + reasoning + brief/synthesis — **deferred เฟส 3+** | GitHub Actions | ตาม token |
 | xAI Grok | ข่าว/sentiment จาก X — **deferred เฟส 3+** | เรียกจาก job | ตาม API |
@@ -70,8 +70,8 @@ showcase/
 | เฟส | ทำอะไร | depends on |
 |---|---|---|
 | 0 — Prereq | push repo ขึ้น GitHub, สมัคร API key (Anthropic/Gemini/Grok/Finnhub/Twelve Data), ใส่ GitHub Secrets, ลง Claude Agent SDK | — |
-| 1 — ข่าวรายวัน | scout-news + .github/workflows/daily.yml + expiry cleanup + auto-commit — **done (pending manual verify: Actions tab → Run workflow)** | 0 |
-| 2 — Portfolio model | portfolio/state.json + rules.md + กติกา DCA (ยังไม่ automate) + seed เริ่มต้น | 0 |
+| 1 — ข่าวรายวัน | scout-news + .github/workflows/daily.yml + expiry cleanup + auto-commit — **done** (known issue: TSM 13F-dump noise ยอมรับเป็น v1 แก้เฟส 5) | 0 |
+| 2 — Portfolio model | portfolio/state.json + rules.md + กติกา DCA (ยังไม่ automate) + seed เริ่มต้น — **done** | 0 |
 | 3 — dca-pilot | agent จำลองซื้อ + ดึงราคา Finnhub/Twelve Data + เขียน history.json (NAV รายวัน) เสียบ cron | 1, 2 |
 | 4 — เว็บอัปเดตเอง | regenerate index.html จาก state/history + Vercel auto-deploy on push | 3 |
 | 5 — Hardening | idempotent cron, error/retry, cost cap, log, กันรันซ้ำวันเดียวกัน | 1-4 |
@@ -93,10 +93,8 @@ showcase/
 - [x] งบ DCA = 10,000 / เดือน
 - [x] การแบ่งน้ำหนัก = ตาม conviction (Earth score) เป็น default, เท่ากันเป็น fallback ถ้ายังไม่มี brief/score — config ใน portfolio/rules.md
 
-ยังต้องตอบ (ไม่บล็อกเฟส 0 บล็อกเฟส 2-3):
-
-- [ ] สกุลงบ 10,000 = THB หรือ USD? (สมมติชั่วคราว = THB, แปลง USD ด้วย FX รายวันจาก market API — ยืนยันก่อนเฟส 3)
-- [ ] วันลง DCA ของเดือน (ผู้ใช้ "เลือกอีกที" — default = วันเทรดแรกของเดือน จนกว่าจะกำหนด)
+- [x] สกุลงบ = **THB** (แปลง USD ด้วย USDTHB rate จาก Finnhub ทุกวันที่รัน)
+- [x] จังหวะ DCA = **ทุกวันศุกร์** (weekly-friday) งบ = 10,000 ÷ จำนวนศุกร์ในเดือนนั้น
 
 ## H. ค่าใช้จ่าย (คร่าว)
 

@@ -1,0 +1,25 @@
+{
+  "simulation": true,
+  "notFinancialAdvice": true,
+  "currency": "THB",
+  "monthlyBudgetTHB": 10000,
+  "cadence": "weekly-friday",
+  "weeklyAmountRule": "งบสัปดาห์ = monthlyBudgetTHB หารจำนวนวันศุกร์ในเดือนนั้น (รวมทั้งเดือน = 10000 พอดี)",
+  "fx": {
+    "pair": "USDTHB",
+    "source": "finnhub",
+    "lastRate": null,
+    "lastRateDate": null
+  },
+  "weighting": {
+    "method": "conviction",
+    "source": "earth-agent",
+    "fallback": "equal"
+  },
+  "watchlist": ["AAPL", "NVDA", "MSFT", "GOOGL", "AMZN", "META", "TSM"],
+  "startDate": null,
+  "cashTHB": 0,
+  "holdings": {},
+  "history": "portfolio/history.json",
+  "lastRun": null
+}
