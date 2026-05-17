@@ -22,7 +22,7 @@ fed-may-2026 | Fed คงดอกเบี้ย 4.25-4.5% รอบ พ.ค. 2
 ## News
 <!-- news summaries ที่บันทึกไว้สำหรับ reference, มักมี expires date -->
 
-News digest 2026-05-17 | 7/7 tickers with relevant news | expires: 2026-05-31 | knowledge/news/2026-05-17.md
+News digest 2026-05-17 | 6/7 tickers with relevant news | expires: 2026-05-31 | knowledge/news/2026-05-17.md
 
 ---
 
