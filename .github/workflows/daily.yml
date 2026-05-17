@@ -25,6 +25,7 @@ jobs:
       - name: Run scout-news
         run: node scripts/scout-news.mjs
         env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

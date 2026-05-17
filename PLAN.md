@@ -16,7 +16,8 @@
 
 | ตัว | บทบาท | รันที่ไหน | ค่าใช้จ่าย |
 |---|---|---|---|
-| Gemini API (`gemini-2.0-flash`) | ข่าวรายวัน + Google Search grounding (เฟส 1 primary) | GitHub Actions | free tier |
+| Finnhub company-news API | ข่าวรายวันต่อ ticker (เฟส 1 primary news source) | GitHub Actions | free tier |
+| Gemini API (`gemini-2.0-flash`) | sentiment batch — ไม่มี grounding (เฟส 1 optional) | GitHub Actions | free tier |
 | GitHub Models (`gpt-4o-mini`) | fallback ถ้า Gemini ล้ม — ยังไม่ implement (TODO) | GitHub Actions | ฟรี |
 | Claude (Agent SDK) | orchestrate + reasoning + brief/synthesis — **deferred เฟส 3+** | GitHub Actions | ตาม token |
 | xAI Grok | ข่าว/sentiment จาก X — **deferred เฟส 3+** | เรียกจาก job | ตาม API |
@@ -26,7 +27,10 @@
 
 **Logo:** ใช้ field `logo` จาก Finnhub company-profile2 endpoint (ไม่ต้องเพิ่ม service โลโก้แยก)
 
-ChatGPT / Hermes / xAI Grok: deferred เฟส 3+ (Gemini ฟรีเพียงพอสำหรับเฟส 1)
+ChatGPT / Hermes / xAI Grok: deferred เฟส 3+
+
+> **เฟส 1 pivot note:** เดิมวางใช้ Gemini + Google Search grounding ดึงข่าว แต่ free tier ชน quota
+> เปลี่ยนเป็น Finnhub company-news (ไม่ต้องใช้ grounding) + Gemini แค่ทำ sentiment batch call
 
 ## C. ที่รัน automation — GitHub Actions (ไม่ใช่ Vercel Cron)
 

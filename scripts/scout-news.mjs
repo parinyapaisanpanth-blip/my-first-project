@@ -1,11 +1,15 @@
 /**
- * scout-news.mjs — Phase 1: daily news digest via Gemini + Google Search grounding
+ * scout-news.mjs — Phase 1: daily news digest
+ *
+ * News source: Finnhub company-news API (FINNHUB_API_KEY)
+ * Sentiment:   Gemini 2.0-flash, single batch call, no grounding (GEMINI_API_KEY, optional)
  *
  * Usage:  node scripts/scout-news.mjs
- * Env:    GEMINI_API_KEY   (primary)
- *         GITHUB_TOKEN     (fallback — no real-time grounding, TODO below)
+ * Env:    FINNHUB_API_KEY  (required — news source)
+ *         GEMINI_API_KEY   (optional — sentiment; falls back to "n/a" on error/missing)
+ *         GITHUB_TOKEN     (reserved — GitHub Models stub, TODO)
  *
- * Exit code: 0 if at least one ticker succeeds, 1 if all fail.
+ * Exit code: 0 if at least one ticker has news, 1 if all tickers return no news.
  */
 
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
@@ -39,83 +43,80 @@ function extractJson(text) {
   return JSON.parse(m[0]);
 }
 
-// ── Gemini call ────────────────────────────────────────────────────────────────
+// ── Finnhub company-news ──────────────────────────────────────────────────────
 
-async function callGemini(ticker, apiKey) {
-  const prompt =
-    `Search the web for news about ${ticker} stock published in the last 24 hours ` +
-    `that could move the stock price. ` +
-    `Reply with ONLY a valid JSON object — no markdown fences, no extra text:\n` +
-    `{"ticker":"${ticker}","sentiment":"bullish","news":[{"headline":"...","source":"...","time":"..."}]}\n` +
-    `Rules: sentiment must be exactly one of: bullish | neutral | bearish. ` +
-    `Include 1–3 most impactful items. ` +
-    `If no significant news, return empty news array with neutral sentiment.`;
+async function fetchFinnhubNews(ticker, apiKey) {
+  const cutoff48h = Math.floor(Date.now() / 1000) - 48 * 3600;
+  const fromDate = addDays(todayISO(), -2);
+  const toDate = todayISO();
+  const url =
+    `https://finnhub.io/api/v1/company-news?symbol=${encodeURIComponent(ticker)}` +
+    `&from=${fromDate}&to=${toDate}&token=${apiKey}`;
 
-  const res = await fetch(GEMINI_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
-    },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      tools: [{ google_search: {} }],
-      generationConfig: { temperature: 0.1 },
-    }),
-  });
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Finnhub HTTP ${res.status} for ${ticker}`);
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Gemini HTTP ${res.status}: ${body.slice(0, 200)}`);
-  }
+  const articles = await res.json();
+  if (!Array.isArray(articles)) throw new Error(`Unexpected Finnhub response for ${ticker}`);
 
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-  return extractJson(text);
+  return articles
+    .filter(a => a.datetime >= cutoff48h)
+    .sort((a, b) => b.datetime - a.datetime)
+    .slice(0, 3)
+    .map(a => ({
+      headline: a.headline,
+      source: a.source,
+      time: new Date(a.datetime * 1000).toISOString(),
+    }));
 }
 
-// ── GitHub Models fallback ────────────────────────────────────────────────────
+// ── Gemini sentiment (batch, no grounding) ────────────────────────────────────
 //
-// TODO: implement real fallback via GitHub Models OpenAI-compatible endpoint:
+// tickerHeadlines: { AAPL: ["headline1", ...], NVDA: [...] }
+// Returns:         { AAPL: "bullish", NVDA: "neutral", ... }
+// On any failure:  returns {} — caller assigns "n/a" to all tickers
+
+async function fetchGeminiSentiment(tickerHeadlines, apiKey) {
+  if (!apiKey || !Object.keys(tickerHeadlines).length) return {};
+  const prompt =
+    `Given these recent news headlines per stock ticker, classify each ticker's sentiment.\n` +
+    `Input:\n${JSON.stringify(tickerHeadlines)}\n` +
+    `Reply with ONLY a JSON object — no fences, no extra text:\n` +
+    `{"AAPL":"bullish","NVDA":"neutral",...}\n` +
+    `Each value must be exactly: bullish | neutral | bearish`;
+
+  try {
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0 },
+      }),
+    });
+    if (!res.ok) {
+      console.warn(`  Gemini sentiment HTTP ${res.status} — setting all to n/a`);
+      return {};
+    }
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    return extractJson(text);
+  } catch (e) {
+    console.warn(`  Gemini sentiment error: ${e.message} — setting all to n/a`);
+    return {};
+  }
+}
+
+// ── GitHub Models fallback (stub) ─────────────────────────────────────────────
+//
+// TODO: implement fallback via GitHub Models OpenAI-compatible endpoint:
 //   POST https://models.inference.ai.azure.com/chat/completions
-//   Authorization: Bearer $GITHUB_TOKEN
-//   model: "gpt-4o-mini"
-//
-// IMPORTANT: GitHub Models has no real-time search grounding — news will be
-// based on training data only, not live web results. Quality will be much lower
-// than Gemini grounding. Implement when GEMINI_API_KEY is unavailable in CI.
+//   Authorization: Bearer $GITHUB_TOKEN   model: "gpt-4o-mini"
 //
 async function callGithubModels(_ticker, _token) {
   throw new Error(
     'GitHub Models fallback not yet implemented — see TODO in scripts/scout-news.mjs'
   );
-}
-
-// ── per-ticker fetch with fallback ────────────────────────────────────────────
-
-async function fetchTickerNews(ticker) {
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const ghToken = process.env.GITHUB_TOKEN;
-
-  if (geminiKey) {
-    try {
-      return await callGemini(ticker, geminiKey);
-    } catch (e) {
-      console.error(`  [${ticker}] Gemini error: ${e.message}`);
-    }
-  } else {
-    console.warn(`  [${ticker}] GEMINI_API_KEY not set`);
-  }
-
-  if (ghToken) {
-    try {
-      return await callGithubModels(ticker, ghToken);
-    } catch (e) {
-      console.error(`  [${ticker}] GitHub Models error: ${e.message}`);
-    }
-  }
-
-  return null;
 }
 
 // ── main ───────────────────────────────────────────────────────────────────────
@@ -124,26 +125,58 @@ const watchlist = JSON.parse(readFileSync(join(ROOT, 'portfolio/watchlist.json')
 const tickers = watchlist.tickers;
 const todayStr = todayISO();
 const expiresStr = addDays(todayStr, 14);
+const finnhubKey = process.env.FINNHUB_API_KEY;
 
-const results = {};
-let successCount = 0;
+// ── Step 1: fetch news from Finnhub per ticker ─────────────────────────────────
+
+const newsMap = {};
+let tickersWithNews = 0;
 
 for (const ticker of tickers) {
-  process.stdout.write(`[${ticker}] fetching... `);
-  const data = await fetchTickerNews(ticker);
-  if (data) {
-    results[ticker] = data;
-    successCount++;
-    console.log(`ok — ${data.sentiment}, ${data.news?.length ?? 0} item(s)`);
-  } else {
-    results[ticker] = { ticker, sentiment: 'no data', news: [] };
-    console.log('no data');
+  process.stdout.write(`[${ticker}] fetching news... `);
+  if (!finnhubKey) {
+    console.warn('FINNHUB_API_KEY not set');
+    newsMap[ticker] = [];
+    continue;
+  }
+  try {
+    const news = await fetchFinnhubNews(ticker, finnhubKey);
+    newsMap[ticker] = news;
+    if (news.length) {
+      tickersWithNews++;
+      console.log(`${news.length} item(s)`);
+    } else {
+      console.log('no news in 48h');
+    }
+  } catch (e) {
+    console.error(`error — ${e.message}`);
+    newsMap[ticker] = [];
   }
 }
 
-if (successCount === 0) {
-  console.error('ERROR: all tickers failed — no data written. Exiting 1.');
+if (tickersWithNews === 0) {
+  console.error('ERROR: no news found for any ticker. Exiting 1.');
   process.exit(1);
+}
+
+// ── Step 2: batch sentiment via Gemini (optional, non-blocking) ────────────────
+
+const tickerHeadlines = {};
+for (const [t, news] of Object.entries(newsMap)) {
+  if (news.length) tickerHeadlines[t] = news.map(n => n.headline);
+}
+
+console.log(`\nFetching sentiment for ${Object.keys(tickerHeadlines).length} tickers...`);
+const sentimentMap = await fetchGeminiSentiment(tickerHeadlines, process.env.GEMINI_API_KEY);
+if (!Object.keys(sentimentMap).length) console.log('Sentiment unavailable — all set to n/a');
+
+// ── Step 3: assemble results ───────────────────────────────────────────────────
+
+const results = {};
+for (const ticker of tickers) {
+  const news = newsMap[ticker] ?? [];
+  const sentiment = news.length ? (sentimentMap[ticker] ?? 'n/a') : 'no data';
+  results[ticker] = { ticker, sentiment, news };
 }
 
 // ── write digest ───────────────────────────────────────────────────────────────
@@ -151,16 +184,21 @@ if (successCount === 0) {
 const newsDir = join(ROOT, 'knowledge/news');
 if (!existsSync(newsDir)) mkdirSync(newsDir, { recursive: true });
 
-const sentiments = Object.values(results).map(r => r.sentiment).filter(s => s !== 'no data');
-const bullishCount = sentiments.filter(s => s === 'bullish').length;
-const bearishCount = sentiments.filter(s => s === 'bearish').length;
-const overallSentiment =
-  bullishCount > bearishCount ? 'bullish' :
-  bearishCount > bullishCount ? 'bearish' : 'mixed';
+const scoredSentiments = Object.values(results)
+  .map(r => r.sentiment)
+  .filter(s => s === 'bullish' || s === 'neutral' || s === 'bearish');
+const bullishCount = scoredSentiments.filter(s => s === 'bullish').length;
+const bearishCount = scoredSentiments.filter(s => s === 'bearish').length;
+const overallSentiment = scoredSentiments.length
+  ? (bullishCount > bearishCount ? 'bullish' : bearishCount > bullishCount ? 'bearish' : 'mixed')
+  : null;
+const summaryLine = overallSentiment
+  ? `${overallSentiment} — ${tickersWithNews}/${tickers.length} tickers with news`
+  : `${tickersWithNews}/${tickers.length} tickers with news`;
 
 let md = `---
 title: News digest ${todayStr}
-summary: ${overallSentiment} — ${successCount}/${tickers.length} tickers with data
+summary: ${summaryLine}
 expires: ${expiresStr}
 tags: [news]
 ---
